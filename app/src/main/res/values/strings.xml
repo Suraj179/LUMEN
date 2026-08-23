@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">LUMEN</string>
+    <string name="login">Login</string>
+    <string name="remember_me_on_this_device">Remember me on this device</string>
+    <string name="lumen">LUMEN</string>
+    <string name="sign_in_to_control_amp_monitor_xa_your_home_iot_system"><![CDATA[Sign in to control & monitor\nyour home IoT system.]]></string>
+    <string name="username_or_email">Username or email</string>
+    <string name="password">Password</string>
+    <string name="secured_session">SECURED SESSION</string>
+    <string name="you_home_com">you@home.com</string>
+    <string name="home_1234">home@1234</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">Fullscreen\nContent</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="on">ON</string>
+    <string name="triggered_by_pir_1">triggered by PIR 1</string>
+    <string name="lightbulb">lightbulb</string>
+    <string name="register">Register</string>
+
+</resources>
