@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFF</color>
+<!--    <color name="white">#FFFFFF</color>-->
     <color name="smokeWhite">#FFFFFF</color>
     <color name="yellow">#FFEB3B</color>
     <color name="light_blue_600">#FF039BE5</color>
@@ -9,4 +9,24 @@
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
+
+    <color name="night">#0B1020</color>
+    <color name="night_2">#131A2E</color>
+    <color name="night_3">#1B2440</color>
+
+    <color name="amber">#F5A947</color>
+    <color name="amber_dark">#1B1204</color>
+
+    <color name="cyan">#5FD4D6</color>
+
+    <color name="mist">#AEB6CC</color>
+    <color name="white">#F4F6FB</color>
+
+    <color name="border">#222B45</color>
+    <color name="gray_text">#6A7390</color>
+
+    <color name="danger">#E2665B</color>
+
+    <color name="transparent">#00000000</color>
+
 </resources>
