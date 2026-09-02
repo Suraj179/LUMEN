@@ -116,24 +116,28 @@
             android:letterSpacing="0.08"
             android:layout_marginBottom="12dp" />
 
-
+        <LinearLayout
+            android:id="@+id/lightContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
         <!-- Living Room -->
 
-        <include
-            layout="@layout/item_light_living"
-            android:id="@+id/livingRoomLight" />
+<!--        <include-->
+<!--            layout="@layout/item_light_living"-->
+<!--            android:id="@+id/livingRoomLight" />-->
 
-        <!-- Bedroom -->
+<!--        &lt;!&ndash; Bedroom &ndash;&gt;-->
 
-        <include
-            layout="@layout/item_light_bedroom"
-            android:id="@+id/bedroomLight" />
+<!--        <include-->
+<!--            layout="@layout/item_light_bedroom"-->
+<!--            android:id="@+id/bedroomLight" />-->
 
-        <!-- Kitchen -->
+<!--        &lt;!&ndash; Kitchen &ndash;&gt;-->
 
-        <include
-            layout="@layout/item_light_kitchen"
-            android:id="@+id/kitchenLight" />
+<!--        <include-->
+<!--            layout="@layout/item_light_kitchen"-->
+<!--            android:id="@+id/kitchenLight" />-->
 
 
         <!-- Today -->
