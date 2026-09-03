@@ -48,54 +48,71 @@ class SensorsFragment : Fragment() {
     }
 
     private fun setupTestButtons() {
-
         binding.btnTestPir1.setOnClickListener {
 
-            if (state.mode != SystemMode.AUTO ||
+            if (
+                state.mode != SystemMode.AUTO ||
                 state.ambient != AmbientState.DARK
             ) {
                 return@setOnClickListener
             }
 
-            state.pir1 =
+            val newState =
                 if (state.pir1 == PirState.IDLE)
                     PirState.ACTIVE
                 else
                     PirState.IDLE
+
+            SystemStateManager.setPirState(
+                pirNumber = 1,
+                pirState = newState
+            )
 
             updateSensorUI()
         }
 
         binding.btnTestPir2.setOnClickListener {
 
-            if (state.mode != SystemMode.AUTO ||
+            if (
+                state.mode != SystemMode.AUTO ||
                 state.ambient != AmbientState.DARK
             ) {
                 return@setOnClickListener
             }
 
-            state.pir2 =
+            val newState =
                 if (state.pir2 == PirState.IDLE)
                     PirState.ACTIVE
                 else
                     PirState.IDLE
+
+            SystemStateManager.setPirState(
+                pirNumber = 2,
+                pirState = newState
+            )
 
             updateSensorUI()
         }
 
         binding.btnTestPir3.setOnClickListener {
 
-            if (state.mode != SystemMode.AUTO ||
+            if (
+                state.mode != SystemMode.AUTO ||
                 state.ambient != AmbientState.DARK
             ) {
                 return@setOnClickListener
             }
 
-            state.pir3 =
+            val newState =
                 if (state.pir3 == PirState.IDLE)
                     PirState.ACTIVE
                 else
                     PirState.IDLE
+
+            SystemStateManager.setPirState(
+                pirNumber = 3,
+                pirState = newState
+            )
 
             updateSensorUI()
         }
