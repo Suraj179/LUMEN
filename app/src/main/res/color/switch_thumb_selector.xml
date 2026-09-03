@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Red when turned ON -->
+    <item android:color="@color/amber" android:state_checked="true" />
+    <!-- Default color when turned OFF -->
+    <item android:color="#777777" />
+</selector>

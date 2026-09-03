@@ -61,4 +61,9 @@
     <string name="off">OFF</string>
 
 
+    <string name="connected">● CONNECTED</string>
+    <string name="disconnected">● DISCONNECTED</string>
+    <string name="mode_auto">AUTO</string>
+    <string name="mode_manual">MANUAL</string>
+
 </resources>

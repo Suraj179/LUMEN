@@ -81,8 +81,9 @@
             android:layout_height="wrap_content"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:contentDescription="Control light" />
-
+            android:contentDescription="Control light"
+            app:thumbTint="@color/switch_thumb_selector"
+            app:trackTint="@color/switch_track_selector" />
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
