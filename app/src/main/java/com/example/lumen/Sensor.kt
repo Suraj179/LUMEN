@@ -7,9 +7,9 @@ enum class SensorType {
 
 data class Sensor(
     val id: Int,
-    val name: String,
+    var name: String,
     val type: SensorType,
-    val gpio: Int,
+    var gpio: Int,
     var linkedLightId: Int? = null,
     var state: PirState = PirState.IDLE
 )

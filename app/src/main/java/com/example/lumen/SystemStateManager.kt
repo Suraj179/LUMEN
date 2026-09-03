@@ -348,4 +348,48 @@ object SystemStateManager {
                 it.state = PirState.IDLE
             }
     }
+
+    fun isGpioInUse(
+        gpio: Int,
+        excludingSensorId: Int? = null
+    ): Boolean {
+        return sensors.any { sensor ->
+            sensor.gpio == gpio &&
+                    sensor.id != excludingSensorId
+        }
+    }
+
+    fun isLightAssignedToPir(
+        lightId: Int,
+        excludingSensorId: Int? = null
+    ): Boolean {
+        return sensors.any { sensor ->
+            sensor.type == SensorType.PIR &&
+                    sensor.linkedLightId == lightId &&
+                    sensor.id != excludingSensorId
+        }
+    }
+
+    fun updatePir(
+        sensorId: Int,
+        name: String,
+        gpio: Int,
+        linkedLightId: Int?
+    ): Boolean {
+
+        val sensor = sensors.find {
+            it.id == sensorId &&
+                    it.type == SensorType.PIR
+        } ?: return false
+
+        sensor.name = name
+
+        // Sensor.gpio is currently val, so this will require
+        // changing it to var in Sensor.kt.
+        sensor.gpio = gpio
+
+        sensor.linkedLightId = linkedLightId
+
+        return true
+    }
 }
