@@ -10,6 +10,6 @@ data class Sensor(
     val name: String,
     val type: SensorType,
     val gpio: Int,
-    val linkedLightId: Int? = null,
+    var linkedLightId: Int? = null,
     var state: PirState = PirState.IDLE
 )

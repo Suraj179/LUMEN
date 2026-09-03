@@ -8,14 +8,7 @@ object SystemStateManager {
         ambient = AmbientState.DAY
     )
 
-    /*
-     * =========================================================
-     * LIGHTS
-     * =========================================================
-     */
-
     val lights: MutableList<Light> = mutableListOf(
-
         Light(
             id = 1,
             room = "Living Room",
@@ -23,7 +16,6 @@ object SystemStateManager {
             mqttTopic = "home/livingroom/light1",
             isOn = false
         ),
-
         Light(
             id = 2,
             room = "Bedroom",
@@ -31,7 +23,6 @@ object SystemStateManager {
             mqttTopic = "home/bedroom/light2",
             isOn = false
         ),
-
         Light(
             id = 3,
             room = "Kitchen",
@@ -41,15 +32,7 @@ object SystemStateManager {
         )
     )
 
-
-    /*
-     * =========================================================
-     * SENSORS
-     * =========================================================
-     */
-
     val sensors: MutableList<Sensor> = mutableListOf(
-
         Sensor(
             id = 1,
             name = "PIR 1",
@@ -57,7 +40,6 @@ object SystemStateManager {
             gpio = 14,
             linkedLightId = 1
         ),
-
         Sensor(
             id = 2,
             name = "PIR 2",
@@ -65,7 +47,6 @@ object SystemStateManager {
             gpio = 27,
             linkedLightId = 2
         ),
-
         Sensor(
             id = 3,
             name = "PIR 3",
@@ -73,7 +54,6 @@ object SystemStateManager {
             gpio = 26,
             linkedLightId = 3
         ),
-
         Sensor(
             id = 4,
             name = "LDR",
@@ -82,12 +62,142 @@ object SystemStateManager {
         )
     )
 
+    // =========================================================
+    // ID GENERATION
+    // =========================================================
 
-    /*
-     * =========================================================
-     * MODE
-     * =========================================================
-     */
+    private fun getNextLightId(): Int {
+        return (lights.maxOfOrNull { it.id } ?: 0) + 1
+    }
+
+    private fun getNextSensorId(): Int {
+        return (sensors.maxOfOrNull { it.id } ?: 0) + 1
+    }
+
+    // =========================================================
+    // LIGHT MANAGEMENT
+    // =========================================================
+
+    fun addLight(
+        room: String
+    ): Light {
+
+        val id = getNextLightId()
+
+        val newLight = Light(
+            id = id,
+            room = room,
+            pirName = "PIR $id",
+            mqttTopic = createMqttTopic(room, id),
+            isOn = false
+        )
+
+        lights.add(newLight)
+
+        return newLight
+    }
+
+    fun deleteLight(
+        lightId: Int
+    ) {
+
+        // Find light
+        lights.removeAll {
+            it.id == lightId
+        }
+
+        // If a PIR is linked to this light,
+        // remove the relationship.
+        sensors.forEach { sensor ->
+
+            if (sensor.linkedLightId == lightId) {
+                sensor.linkedLightId = null
+            }
+        }
+
+        updateAutomaticLights()
+    }
+
+    // =========================================================
+    // SENSOR MANAGEMENT
+    // =========================================================
+
+    fun addPir(
+        name: String,
+        gpio: Int,
+        linkedLightId: Int?
+    ): Sensor {
+
+        val id = getNextSensorId()
+
+        val newSensor = Sensor(
+            id = id,
+            name = name,
+            type = SensorType.PIR,
+            gpio = gpio,
+            linkedLightId = linkedLightId,
+            state = PirState.IDLE
+        )
+
+        sensors.add(newSensor)
+
+        return newSensor
+    }
+
+    fun deleteSensor(
+        sensorId: Int
+    ) {
+
+        sensors.removeAll {
+            it.id == sensorId
+        }
+
+        updateAutomaticLights()
+    }
+
+    fun addLdr(
+        gpio: Int
+    ): Sensor {
+
+        val id = getNextSensorId()
+
+        val newSensor = Sensor(
+            id = id,
+            name = "LDR",
+            type = SensorType.LDR,
+            gpio = gpio
+        )
+
+        sensors.add(newSensor)
+
+        return newSensor
+    }
+
+    fun hasLdr(): Boolean {
+        return sensors.any {
+            it.type == SensorType.LDR
+        }
+    }
+
+    // =========================================================
+    // MQTT TOPIC
+    // =========================================================
+
+    private fun createMqttTopic(
+        room: String,
+        id: Int
+    ): String {
+
+        val cleanRoom = room
+            .lowercase()
+            .replace(" ", "")
+
+        return "home/$cleanRoom/light$id"
+    }
+
+    // =========================================================
+    // SYSTEM MODE
+    // =========================================================
 
     fun setMode(mode: SystemMode) {
 
@@ -96,25 +206,12 @@ object SystemStateManager {
         when (mode) {
 
             SystemMode.MANUAL -> {
-
-                /*
-                 * PIR has no control in MANUAL mode.
-                 */
-
                 setAllPirIdle()
             }
 
             SystemMode.AUTO -> {
 
-                /*
-                 * AUTO + DAY:
-                 *
-                 * All lights OFF
-                 * PIR IDLE
-                 */
-
                 if (state.ambient == AmbientState.DAY) {
-
                     turnAllLightsOff()
                     setAllPirIdle()
                 }
@@ -123,13 +220,6 @@ object SystemStateManager {
 
         updateAutomaticLights()
     }
-
-
-    /*
-     * =========================================================
-     * AMBIENT
-     * =========================================================
-     */
 
     fun setAmbient(ambient: AmbientState) {
 
@@ -140,49 +230,25 @@ object SystemStateManager {
             when (ambient) {
 
                 AmbientState.DAY -> {
-
-                    /*
-                     * Daytime:
-                     *
-                     * All lights OFF
-                     * PIR IDLE
-                     */
-
                     turnAllLightsOff()
                     setAllPirIdle()
                 }
 
                 AmbientState.DARK -> {
-
-                    /*
-                     * Darkness:
-                     *
-                     * PIR controls lights.
-                     */
-
                     updateAutomaticLights()
                 }
             }
         }
     }
 
-
-    /*
-     * =========================================================
-     * PIR STATE
-     * =========================================================
-     */
+    // =========================================================
+    // PIR
+    // =========================================================
 
     fun setPirState(
         pirNumber: Int,
         pirState: PirState
     ) {
-
-        /*
-         * PIR only controls lights during
-         *
-         * AUTO + DARK
-         */
 
         if (
             state.mode != SystemMode.AUTO ||
@@ -201,20 +267,11 @@ object SystemStateManager {
         updateAutomaticLights()
     }
 
-
-    /*
-     * =========================================================
-     * AUTOMATIC LIGHT CONTROL
-     * =========================================================
-     */
+    // =========================================================
+    // AUTOMATIC LIGHT CONTROL
+    // =========================================================
 
     private fun updateAutomaticLights() {
-
-        /*
-         * Automatic lighting only works when:
-         *
-         * AUTO + DARK
-         */
 
         if (
             state.mode != SystemMode.AUTO ||
@@ -223,20 +280,14 @@ object SystemStateManager {
             return
         }
 
-        /*
-         * Start by turning all configured lights OFF.
-         */
-
         lights.forEach {
             it.isOn = false
         }
 
-        /*
-         * Each PIR controls its linked light.
-         */
-
         sensors
-            .filter { it.type == SensorType.PIR }
+            .filter {
+                it.type == SensorType.PIR
+            }
             .forEach { sensor ->
 
                 val linkedLightId = sensor.linkedLightId
@@ -256,22 +307,14 @@ object SystemStateManager {
             }
     }
 
-
-    /*
-     * =========================================================
-     * LIGHT CONTROL
-     * =========================================================
-     */
+    // =========================================================
+    // MANUAL LIGHT CONTROL
+    // =========================================================
 
     fun setLightState(
         lightId: Int,
         isOn: Boolean
     ) {
-
-        /*
-         * Manual control is only allowed
-         * in MANUAL mode.
-         */
 
         if (state.mode != SystemMode.MANUAL) {
             return
@@ -284,12 +327,9 @@ object SystemStateManager {
         light?.isOn = isOn
     }
 
-
-    /*
-     * =========================================================
-     * TURN ALL LIGHTS OFF
-     * =========================================================
-     */
+    // =========================================================
+    // HELPERS
+    // =========================================================
 
     private fun turnAllLightsOff() {
 
@@ -297,13 +337,6 @@ object SystemStateManager {
             it.isOn = false
         }
     }
-
-
-    /*
-     * =========================================================
-     * SET ALL PIR IDLE
-     * =========================================================
-     */
 
     private fun setAllPirIdle() {
 

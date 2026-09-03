@@ -1,7 +1,7 @@
 package com.example.lumen
 data class Light(
     val id: Int,
-    val room: String,
+    var room: String,
     val pirName: String,
     val mqttTopic: String,
     var isOn: Boolean = false

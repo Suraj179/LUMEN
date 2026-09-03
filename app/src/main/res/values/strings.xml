@@ -13,7 +13,6 @@
     <string name="dummy_content">Fullscreen\nContent</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="on">ON</string>
     <string name="triggered_by_pir_1">triggered by PIR 1</string>
     <string name="lightbulb">lightbulb</string>
     <string name="register">Register</string>
@@ -35,5 +34,30 @@
 
     <string name="ldr_daylight">Daylight detected</string>
     <string name="ldr_dark">Darkness detected</string>
+
+    <string name="add_light">Add Light</string>
+    <string name="add_pir">Add PIR Sensor</string>
+    <string name="add_ldr">Add LDR</string>
+    <string name="lights">Lights</string>
+    <string name="sensors">Sensors</string>
+    <string name="no_lights">No lights configured</string>
+    <string name="no_sensors">No sensors configured</string>
+
+    <string name="light">Light</string>
+    <string name="sensor">Sensor</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="add_device">Add Device</string>
+    <string name="light_name_format">Light %1$d</string>
+    <string name="gpio_format">GPIO %1$d</string>
+    <string name="topic_format">topic: %1$s</string>
+    <string name="device_count_format">%1$d registered devices</string>
+    <string name="pir">PIR</string>
+    <string name="ldr">LDR</string>
+    <string name="linked_light_format">Linked light: %1$s</string>
+    <string name="no_linked_light">No linked light</string>
+
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
 
 </resources>
