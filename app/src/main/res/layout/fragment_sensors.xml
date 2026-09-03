@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.core.widget.NestedScrollView
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,58 +12,116 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="22dp">
+        android:padding="16dp">
+
+        <!-- Header -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sensors"
             android:textColor="@color/white"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/txtSensorSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Live readings from the ESP32 controller"
-            android:textColor="@color/mist"
-            android:textSize="13sp"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="20dp" />
+            android:text="Monitor system sensors"
+            android:textColor="@color/gray_text"
+            android:textSize="12sp" />
 
-
-        <!-- LDR -->
+        <!-- Current system state -->
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
             app:cardBackgroundColor="@color/night_3"
-            app:cardCornerRadius="18dp"
+            app:cardCornerRadius="16dp"
             app:strokeColor="@color/border"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="22dp">
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="18dp"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SYSTEM STATUS"
+                    android:textColor="@color/gray_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtSensorMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="MANUAL"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtSensorModeDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="PIR sensors are not controlling lights"
+                    android:textColor="@color/gray_text"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- PIR title -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="PIR SENSORS"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- PIR 1 -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:padding="14dp">
 
                 <FrameLayout
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:background="@drawable/bg_sensor_gauge">
+                    android:id="@+id/pir1IconContainer"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_sensor_icon">
 
-                    <TextView
-                        android:id="@+id/txtLdrValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
                         android:layout_gravity="center"
-                        android:text="42"
-                        android:textColor="@color/white"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:src="@drawable/ic_sensor"
+                        android:contentDescription="PIR 1" />
 
                 </FrameLayout>
 
@@ -71,114 +129,316 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ambient light"
+                        android:text="PIR 1"
                         android:textColor="@color/white"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/txtLdrLocation"
+                        android:id="@+id/txtPir1Description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hallway LDR sensor"
-                        android:textColor="@color/mist"
-                        android:textSize="12sp"
-                        android:layout_marginTop="4dp" />
-
-                    <TextView
-                        android:id="@+id/txtAmbientStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="DARK · AUTO ON"
-                        android:textColor="@color/cyan"
-                        android:textSize="11sp"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="3dp"
+                        android:text="IDLE"
+                        android:textColor="@color/gray_text"
+                        android:textSize="11sp" />
 
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtPir1Status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IDLE"
+                    android:textColor="@color/gray_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MOTION SENSORS"
-            android:textColor="@color/gray_text"
-            android:textSize="11sp"
-            android:letterSpacing="0.08"
-            android:layout_marginBottom="12dp" />
-
-
-        <!-- PIR 1 -->
-
-        <include
-            layout="@layout/item_pir_sensor"
-            android:id="@+id/pirSensor1" />
-
         <!-- PIR 2 -->
 
-        <include
-            layout="@layout/item_pir_sensor"
-            android:id="@+id/pirSensor2" />
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp">
+
+                <FrameLayout
+                    android:id="@+id/pir2IconContainer"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_sensor_icon">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sensor"
+                        android:contentDescription="PIR 2" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PIR 2"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtPir2Description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="IDLE"
+                        android:textColor="@color/gray_text"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtPir2Status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IDLE"
+                    android:textColor="@color/gray_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- PIR 3 -->
 
-        <include
-            layout="@layout/item_pir_sensor"
-            android:id="@+id/pirSensor3" />
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp">
+
+                <FrameLayout
+                    android:id="@+id/pir3IconContainer"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_sensor_icon">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sensor"
+                        android:contentDescription="PIR 3" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PIR 3"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtPir3Description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="IDLE"
+                        android:textColor="@color/gray_text"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtPir3Status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IDLE"
+                    android:textColor="@color/gray_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- LDR -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="RECENT ACTIVITY"
-            android:textColor="@color/gray_text"
-            android:textSize="11sp"
-            android:letterSpacing="0.08"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginTop="22dp"
+            android:text="AMBIENT LIGHT"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
-
-        <LinearLayout
-            android:id="@+id/activityLog"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="●  PIR 1 detected motion → Light 1 ON"
-                android:textColor="@color/mist"
-                android:textSize="12sp"
-                android:padding="10dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="●  LDR reading dropped below threshold"
-                android:textColor="@color/mist"
-                android:textSize="12sp"
-                android:padding="10dp" />
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_sensor_icon">
 
-            <TextView
-                android:layout_width="match_parent"
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sensor"
+                        android:contentDescription="LDR" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LDR"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtLdrDescription"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Ambient light sensor"
+                        android:textColor="@color/gray_text"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtLdrStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DAY"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Simulation controls -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="TEST SENSOR"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtSimulationInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Temporary controls for testing. These will later be replaced by ESP32/MQTT readings."
+            android:textColor="@color/gray_text"
+            android:textSize="11sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestPir1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="●  PIR 3 idle → Light 3 OFF"
-                android:textColor="@color/mist"
-                android:textSize="12sp"
-                android:padding="10dp" />
+                android:layout_weight="1"
+                android:text="PIR 1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestPir2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="PIR 2" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestPir3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="PIR 3" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</androidx.core.widget.NestedScrollView>
+</ScrollView>
