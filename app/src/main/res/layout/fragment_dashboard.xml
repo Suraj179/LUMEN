@@ -1,221 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.core.widget.NestedScrollView
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/night"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@color/night">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="22dp">
+        android:padding="16dp">
 
         <!-- Header -->
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dashboard"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtDashboardSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="System overview and lighting control"
+            android:textColor="@color/gray_text"
+            android:textSize="12sp" />
+
+        <!-- System status -->
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="18dp">
+            android:layout_marginTop="18dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Good evening"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3 lights · 3 sensors online"
-                    android:textColor="@color/mist"
-                    android:textSize="13sp"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/btnLogout"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_button"
-                android:src="@drawable/ic_logout"
-                android:contentDescription="Logout"
-                app:tint="@color/mist" />
-
-        </LinearLayout>
-
-
-        <!-- Ambient -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="14dp"
-            android:background="@drawable/bg_ambient"
-            android:layout_marginBottom="20dp">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_moon"
-                app:tint="@color/cyan"
-                android:contentDescription="Ambient mode" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="10dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dark · Auto mode active"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
+                    android:text="SYSTEM"
+                    android:textColor="@color/gray_text"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtSystemConnection"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="LDR reading 42 lux — lights respond to motion"
-                    android:textColor="@color/mist"
+                    android:layout_marginTop="6dp"
+                    android:text="● CONNECTED"
+                    android:textColor="@color/amber"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/border" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="SYSTEM MODE"
+                    android:textColor="@color/gray_text"
                     android:textSize="11sp"
-                    android:layout_marginTop="3dp" />
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/modeGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnManual"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="MANUAL"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAuto"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="AUTO"
+                        android:textSize="12sp" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Ambient control -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/ambientCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/night_3"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AMBIENT"
+                    android:textColor="@color/gray_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtAmbientState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="DAYLIGHT"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtAmbientDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="All lights are OFF"
+                    android:textColor="@color/gray_text"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/ambientToggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDay"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="DAY" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDark"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="DARK" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
 
             </LinearLayout>
 
-        </LinearLayout>
-
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Lights -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
             android:text="LIGHTS"
-            android:textColor="@color/gray_text"
-            android:textSize="11sp"
-            android:letterSpacing="0.08"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/lightContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:orientation="vertical" />
-        <!-- Living Room -->
-
-<!--        <include-->
-<!--            layout="@layout/item_light_living"-->
-<!--            android:id="@+id/livingRoomLight" />-->
-
-<!--        &lt;!&ndash; Bedroom &ndash;&gt;-->
-
-<!--        <include-->
-<!--            layout="@layout/item_light_bedroom"-->
-<!--            android:id="@+id/bedroomLight" />-->
-
-<!--        &lt;!&ndash; Kitchen &ndash;&gt;-->
-
-<!--        <include-->
-<!--            layout="@layout/item_light_kitchen"-->
-<!--            android:id="@+id/kitchenLight" />-->
-
-
-        <!-- Today -->
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TODAY"
-            android:textColor="@color/gray_text"
-            android:textSize="11sp"
-            android:letterSpacing="0.08"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="14dp"
-                android:background="@drawable/bg_card"
-                android:layout_marginEnd="6dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="14"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Motion events"
-                    android:textColor="@color/mist"
-                    android:textSize="11sp"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="14dp"
-                android:background="@drawable/bg_card"
-                android:layout_marginStart="6dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3/3"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sensors online"
-                    android:textColor="@color/mist"
-                    android:textSize="11sp"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
 
     </LinearLayout>
 
-</androidx.core.widget.NestedScrollView>
+</ScrollView>
