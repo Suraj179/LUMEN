@@ -288,41 +288,127 @@ class DevicesFragment : Fragment() {
 
     private fun showAddPirDialog() {
 
+        val lights = SystemStateManager.lights
+
+        if (lights.isEmpty()) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("No Lights Available")
+                .setMessage(
+                    "Add a Light first before creating a PIR sensor."
+                )
+                .setPositiveButton("OK", null)
+                .show()
+
+            return
+        }
+
         val layout =
-            LinearLayout(requireContext())
+            LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(
+                    40,
+                    0,
+                    40,
+                    0
+                )
+            }
 
-        layout.orientation =
-            LinearLayout.VERTICAL
-
-        layout.setPadding(
-            40,
-            0,
-            40,
-            0
-        )
-
+        // Sensor name
         val nameInput =
-            EditText(requireContext())
+            EditText(requireContext()).apply {
+                hint = "Sensor name"
+                inputType =
+                    InputType.TYPE_CLASS_TEXT or
+                            InputType.TYPE_TEXT_FLAG_CAP_WORDS
+            }
 
-        nameInput.hint = "Sensor name"
-        nameInput.inputType =
-            InputType.TYPE_CLASS_TEXT or
-                    InputType.TYPE_TEXT_FLAG_CAP_WORDS
-
+        // GPIO
         val gpioInput =
-            EditText(requireContext())
+            EditText(requireContext()).apply {
+                hint = "GPIO number"
+                inputType =
+                    InputType.TYPE_CLASS_NUMBER
+            }
 
-        gpioInput.hint = "GPIO number"
-        gpioInput.inputType =
-            InputType.TYPE_CLASS_NUMBER
+        // Light selection label
+        val lightLabel =
+            android.widget.TextView(requireContext()).apply {
+                text = "Controls"
+                setTextColor(
+                    resources.getColor(
+                        R.color.mist,
+                        null
+                    )
+                )
+                textSize = 13f
+            }
+
+        // Light dropdown
+        val lightSpinner =
+            android.widget.Spinner(requireContext())
+
+        val lightNames =
+            lights.map { light ->
+                "Light ${light.id} — ${light.room}"
+            }
+
+        val spinnerAdapter =
+            android.widget.ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                lightNames
+            )
+
+        lightSpinner.adapter = spinnerAdapter
 
         layout.addView(nameInput)
-        layout.addView(gpioInput)
+
+        val gpioParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+        gpioParams.topMargin = 8
+
+        layout.addView(
+            gpioInput,
+            gpioParams
+        )
+
+        val labelParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+        labelParams.topMargin = 16
+
+        layout.addView(
+            lightLabel,
+            labelParams
+        )
+
+        val spinnerParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+        spinnerParams.topMargin = 4
+
+        layout.addView(
+            lightSpinner,
+            spinnerParams
+        )
 
         AlertDialog.Builder(requireContext())
             .setTitle("Add PIR Sensor")
             .setView(layout)
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(
+                "Cancel",
+                null
+            )
             .setPositiveButton("Add") { _, _ ->
 
                 val name =
@@ -342,10 +428,14 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
+                // Get the selected Light
+                val selectedLight =
+                    lights[lightSpinner.selectedItemPosition]
+
                 SystemStateManager.addPir(
                     name = name,
                     gpio = gpio,
-                    linkedLightId = null
+                    linkedLightId = selectedLight.id
                 )
 
                 refreshDeviceList()

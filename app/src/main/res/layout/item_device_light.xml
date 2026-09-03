@@ -35,8 +35,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/txtDeviceLightName"
@@ -59,10 +59,10 @@
                 android:id="@+id/txtDeviceLightStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/amber"
-                android:textSize="10sp"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="5dp"
+                android:textColor="@color/amber"
+                android:textSize="10sp"
                 android:background="@drawable/bg_status_on" />
 
         </LinearLayout>
@@ -71,18 +71,18 @@
             android:id="@+id/txtDeviceLightTopic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:padding="9dp"
             android:textColor="@color/cyan"
             android:textSize="11sp"
             android:fontFamily="monospace"
-            android:padding="9dp"
-            android:layout_marginTop="10dp"
             android:background="@drawable/bg_topic" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnEditLight"
@@ -98,10 +98,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="8dp"
                 android:text="@string/delete"
                 android:textColor="@color/danger"
-                android:backgroundTint="@color/night_2"
-                android:layout_marginStart="8dp" />
+                android:backgroundTint="@color/night_2" />
 
         </LinearLayout>
 
