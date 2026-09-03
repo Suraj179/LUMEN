@@ -95,6 +95,7 @@
         <!-- PIR 1 -->
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/pir1Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -167,6 +168,7 @@
         <!-- PIR 2 -->
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/pir2Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -239,6 +241,7 @@
         <!-- PIR 3 -->
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/pir3Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -320,6 +323,7 @@
             android:textStyle="bold" />
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/ldrCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

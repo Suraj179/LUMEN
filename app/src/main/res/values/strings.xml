@@ -18,4 +18,22 @@
     <string name="lightbulb">lightbulb</string>
     <string name="register">Register</string>
 
+    <string name="sensor_active">ACTIVE</string>
+    <string name="sensor_idle">IDLE</string>
+    <string name="sensor_not_controlling">Not controlling lights</string>
+    <string name="sensor_lighting_paused">Lighting control paused</string>
+    <string name="sensor_no_motion">No motion detected</string>
+    <string name="sensor_motion_controlling">Motion detected • controlling %1$s</string>
+
+    <string name="ambient_day">DAY</string>
+    <string name="ambient_dark">DARK</string>
+
+    <string name="sensor_mode_manual">Manual mode</string>
+    <string name="sensor_mode_auto">Automatic mode</string>
+    <string name="sensor_mode_manual_description">Sensors are not controlling the lights</string>
+    <string name="sensor_mode_auto_description">Sensors can control lights automatically</string>
+
+    <string name="ldr_daylight">Daylight detected</string>
+    <string name="ldr_dark">Darkness detected</string>
+
 </resources>

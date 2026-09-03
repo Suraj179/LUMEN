@@ -5,14 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-
 import com.example.lumen.databinding.FragmentDashboardBinding
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.switchmaterial.SwitchMaterial
 
@@ -21,8 +21,10 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
 
-    private val state
-        get() = SystemStateManager.state
+
+    // =========================================================
+    // LIFECYCLE
+    // =========================================================
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +41,7 @@ class DashboardFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?
@@ -51,61 +54,140 @@ class DashboardFragment : Fragment() {
         updateDashboard()
     }
 
-    private fun setupModeButtons() {
 
-        binding.btnManual.setOnClickListener {
+    override fun onResume() {
+        super.onResume()
 
-            SystemStateManager.setMode(SystemMode.MANUAL)
-
+        if (_binding != null) {
             updateDashboard()
         }
+    }
 
-        binding.btnAuto.setOnClickListener {
 
-            SystemStateManager.setMode(SystemMode.AUTO)
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _binding = null
+    }
+
+
+    // =========================================================
+    // MODE BUTTONS
+    // =========================================================
+
+    private fun setupModeButtons() {
+
+        binding.modeGroup.addOnButtonCheckedListener {
+
+                _: MaterialButtonToggleGroup,
+                checkedId: Int,
+                isChecked: Boolean ->
+
+            if (!isChecked) {
+                return@addOnButtonCheckedListener
+            }
+
+            when (checkedId) {
+
+                binding.btnManual.id -> {
+
+                    SystemStateManager.setMode(
+                        SystemMode.MANUAL
+                    )
+                }
+
+                binding.btnAuto.id -> {
+
+                    SystemStateManager.setMode(
+                        SystemMode.AUTO
+                    )
+                }
+            }
 
             updateDashboard()
         }
     }
+
+
+    // =========================================================
+    // AMBIENT BUTTONS
+    // =========================================================
 
     private fun setupAmbientButtons() {
 
-        binding.btnDay.setOnClickListener {
+        binding.ambientToggle.addOnButtonCheckedListener {
 
-            if (state.mode != SystemMode.AUTO) {
-                return@setOnClickListener
+                _: MaterialButtonToggleGroup,
+                checkedId: Int,
+                isChecked: Boolean ->
+
+            if (!isChecked) {
+                return@addOnButtonCheckedListener
             }
 
-            SystemStateManager.setAmbient(AmbientState.DAY)
+            /*
+             * Ambient control is only relevant
+             * when the system is in AUTO mode.
+             */
 
-            updateDashboard()
-        }
-
-        binding.btnDark.setOnClickListener {
-
-            if (state.mode != SystemMode.AUTO) {
-                return@setOnClickListener
+            if (
+                SystemStateManager.state.mode !=
+                SystemMode.AUTO
+            ) {
+                return@addOnButtonCheckedListener
             }
 
-            SystemStateManager.setAmbient(AmbientState.DARK)
+            when (checkedId) {
+
+                binding.btnDay.id -> {
+
+                    SystemStateManager.setAmbient(
+                        AmbientState.DAY
+                    )
+                }
+
+                binding.btnDark.id -> {
+
+                    SystemStateManager.setAmbient(
+                        AmbientState.DARK
+                    )
+                }
+            }
 
             updateDashboard()
         }
     }
+
+
+    // =========================================================
+    // UPDATE DASHBOARD
+    // =========================================================
 
     private fun updateDashboard() {
 
-        updateConnectionStatus()
+        updateConnectionUI()
+
         updateModeUI()
+
         updateAmbientUI()
+
         setupLights()
     }
 
-    private fun updateConnectionStatus() {
 
-        if (state.connected) {
+    // =========================================================
+    // CONNECTION UI
+    // =========================================================
 
-            binding.txtSystemConnection.text = "● CONNECTED"
+    private fun updateConnectionUI() {
+
+        val connected =
+            SystemStateManager.state.connected
+
+        if (connected) {
+
+            binding.txtSystemConnection.text =
+                "● CONNECTED"
 
             binding.txtSystemConnection.setTextColor(
                 ContextCompat.getColor(
@@ -116,7 +198,8 @@ class DashboardFragment : Fragment() {
 
         } else {
 
-            binding.txtSystemConnection.text = "● DISCONNECTED"
+            binding.txtSystemConnection.text =
+                "● DISCONNECTED"
 
             binding.txtSystemConnection.setTextColor(
                 ContextCompat.getColor(
@@ -127,42 +210,71 @@ class DashboardFragment : Fragment() {
         }
     }
 
+
+    // =========================================================
+    // MODE UI
+    // =========================================================
+
     private fun updateModeUI() {
 
-        when (state.mode) {
+        when (SystemStateManager.state.mode) {
 
             SystemMode.MANUAL -> {
 
-                binding.btnManual.isChecked = true
-                binding.btnAuto.isChecked = false
+                binding.modeGroup.check(
+                    binding.btnManual.id
+                )
 
-                binding.ambientCard.visibility = View.GONE
+                /*
+                 * Ambient control is only shown
+                 * in AUTO mode.
+                 */
+
+                binding.ambientCard.visibility =
+                    View.GONE
             }
 
             SystemMode.AUTO -> {
 
-                binding.btnManual.isChecked = false
-                binding.btnAuto.isChecked = true
+                binding.modeGroup.check(
+                    binding.btnAuto.id
+                )
 
-                binding.ambientCard.visibility = View.VISIBLE
+                binding.ambientCard.visibility =
+                    View.VISIBLE
             }
         }
     }
 
+
+    // =========================================================
+    // AMBIENT UI
+    // =========================================================
+
     private fun updateAmbientUI() {
 
-        if (state.mode != SystemMode.AUTO) {
+        /*
+         * Nothing to update when ambient card
+         * is hidden in MANUAL mode.
+         */
+
+        if (
+            SystemStateManager.state.mode !=
+            SystemMode.AUTO
+        ) {
             return
         }
 
-        when (state.ambient) {
+        when (SystemStateManager.state.ambient) {
 
             AmbientState.DAY -> {
 
-                binding.btnDay.isChecked = true
-                binding.btnDark.isChecked = false
+                binding.ambientToggle.check(
+                    binding.btnDay.id
+                )
 
-                binding.txtAmbientState.text = "DAYLIGHT"
+                binding.txtAmbientState.text =
+                    "DAYLIGHT"
 
                 binding.txtAmbientDescription.text =
                     "All lights are OFF • PIR is idle"
@@ -170,10 +282,12 @@ class DashboardFragment : Fragment() {
 
             AmbientState.DARK -> {
 
-                binding.btnDay.isChecked = false
-                binding.btnDark.isChecked = true
+                binding.ambientToggle.check(
+                    binding.btnDark.id
+                )
 
-                binding.txtAmbientState.text = "DARK"
+                binding.txtAmbientState.text =
+                    "DARK"
 
                 binding.txtAmbientDescription.text =
                     "PIR sensors control the lights"
@@ -181,120 +295,188 @@ class DashboardFragment : Fragment() {
         }
     }
 
+
+    // =========================================================
+    // DYNAMIC LIGHT LIST
+    // =========================================================
+
     private fun setupLights() {
+
+        /*
+         * Remove old cards first.
+         *
+         * This is important because the Devices
+         * screen will eventually add/delete lights.
+         */
 
         binding.lightContainer.removeAllViews()
 
-        val lights = listOf(
 
-            Light(
-                id = 1,
-                room = "Living Room",
-                pirName = "PIR 1",
-                mqttTopic = "home/livingroom/light1",
-                isOn = state.livingRoomOn
-            ),
+        /*
+         * Get the current configured lights.
+         */
 
-            Light(
-                id = 2,
-                room = "Bedroom",
-                pirName = "PIR 2",
-                mqttTopic = "home/bedroom/light2",
-                isOn = state.bedroomOn
-            ),
+        val lights =
+            SystemStateManager.lights
 
-            Light(
-                id = 3,
-                room = "Kitchen",
-                pirName = "PIR 3",
-                mqttTopic = "home/kitchen/light3",
-                isOn = state.kitchenOn
-            )
-        )
+
+        /*
+         * Create one card for every configured light.
+         */
 
         lights.forEach { light ->
 
-            val card = createLightCard(light)
-
-            binding.lightContainer.addView(card)
+            createLightCard(light)
         }
     }
 
-    private fun createLightCard(light: Light): View {
 
-        val view = layoutInflater.inflate(
-            R.layout.item_light,
-            binding.lightContainer,
-            false
-        )
+    // =========================================================
+    // CREATE LIGHT CARD
+    // =========================================================
+
+    private fun createLightCard(
+        light: Light
+    ) {
+
+        val itemBinding =
+            com.example.lumen.databinding.ItemLightBinding.inflate(
+                layoutInflater,
+                binding.lightContainer,
+                false
+            )
+
+
+        /*
+         * Views from item_light.xml
+         */
 
         val card =
-            view.findViewById<MaterialCardView>(R.id.lightCard)
+            itemBinding.lightCard
 
         val iconContainer =
-            view.findViewById<FrameLayout>(R.id.lightIconContainer)
+            itemBinding.lightIconContainer
 
         val icon =
-            view.findViewById<ImageView>(R.id.lightIcon)
+            itemBinding.lightIcon
 
         val roomName =
-            view.findViewById<TextView>(R.id.txtRoomName)
+            itemBinding.txtRoomName
 
         val status =
-            view.findViewById<TextView>(R.id.txtLightStatus)
+            itemBinding.txtLightStatus
 
         val controlInfo =
-            view.findViewById<TextView>(R.id.txtLightControlInfo)
+            itemBinding.txtLightControlInfo
 
         val lightSwitch =
-            view.findViewById<SwitchMaterial>(R.id.lightSwitch)
+            itemBinding.lightSwitch
 
-        roomName.text = light.room
+
+        /*
+         * Set room name.
+         */
+
+        roomName.text =
+            light.room
+
+
+        /*
+         * Set initial switch state.
+         */
+
+        lightSwitch.isChecked =
+            light.isOn
+
+
+        /*
+         * Update card appearance.
+         */
 
         updateLightAppearance(
-            light,
-            card,
-            iconContainer,
-            icon,
-            status,
-            lightSwitch
+            light = light,
+            card = card,
+            iconContainer = iconContainer,
+            icon = icon,
+            status = status,
+            lightSwitch = lightSwitch
         )
+
+
+        /*
+         * Update control information.
+         */
 
         updateLightControlInfo(
-            light,
-            controlInfo,
-            lightSwitch
+            light = light,
+            controlInfo = controlInfo,
+            lightSwitch = lightSwitch
         )
 
-        lightSwitch.setOnCheckedChangeListener { _, isChecked ->
 
-            if (state.mode != SystemMode.MANUAL) {
+        /*
+         * Manual switch control.
+         */
+
+        lightSwitch.setOnCheckedChangeListener {
+
+                _: CompoundButton,
+                isChecked: Boolean ->
+
+            /*
+             * AUTO mode controls the light automatically.
+             *
+             * Therefore the user cannot manually
+             * change the light in AUTO mode.
+             */
+
+            if (
+                SystemStateManager.state.mode !=
+                SystemMode.MANUAL
+            ) {
+
                 return@setOnCheckedChangeListener
             }
 
-            light.isOn = isChecked
 
-            when (light.id) {
+            /*
+             * Update central state.
+             */
 
-                1 -> state.livingRoomOn = isChecked
+            SystemStateManager.setLightState(
+                lightId = light.id,
+                isOn = isChecked
+            )
 
-                2 -> state.bedroomOn = isChecked
 
-                3 -> state.kitchenOn = isChecked
-            }
+            /*
+             * Update this card.
+             */
 
             updateLightAppearance(
-                light,
-                card,
-                iconContainer,
-                icon,
-                status,
-                lightSwitch
+                light = light,
+                card = card,
+                iconContainer = iconContainer,
+                icon = icon,
+                status = status,
+                lightSwitch = lightSwitch
             )
         }
 
-        return view
+
+        /*
+         * Add card to the dashboard.
+         */
+
+        binding.lightContainer.addView(
+            itemBinding.root
+        )
     }
+
+
+    // =========================================================
+    // LIGHT APPEARANCE
+    // =========================================================
 
     private fun updateLightAppearance(
         light: Light,
@@ -307,13 +489,20 @@ class DashboardFragment : Fragment() {
 
         if (light.isOn) {
 
+            /*
+             * =========================
+             * LIGHT ON
+             * =========================
+             */
+
             card.strokeColor =
                 ContextCompat.getColor(
                     requireContext(),
                     R.color.amber
                 )
 
-            iconContainer.isSelected = true
+            iconContainer.isSelected =
+                true
 
             icon.imageTintList =
                 ColorStateList.valueOf(
@@ -323,7 +512,8 @@ class DashboardFragment : Fragment() {
                     )
                 )
 
-            status.text = "ON"
+            status.text =
+                "ON"
 
             status.setTextColor(
                 ContextCompat.getColor(
@@ -332,9 +522,16 @@ class DashboardFragment : Fragment() {
                 )
             )
 
-            lightSwitch.isChecked = true
+            lightSwitch.isChecked =
+                true
 
         } else {
+
+            /*
+             * =========================
+             * LIGHT OFF
+             * =========================
+             */
 
             card.strokeColor =
                 ContextCompat.getColor(
@@ -342,7 +539,8 @@ class DashboardFragment : Fragment() {
                     R.color.border
                 )
 
-            iconContainer.isSelected = false
+            iconContainer.isSelected =
+                false
 
             icon.imageTintList =
                 ColorStateList.valueOf(
@@ -352,7 +550,8 @@ class DashboardFragment : Fragment() {
                     )
                 )
 
-            status.text = "OFF"
+            status.text =
+                "OFF"
 
             status.setTextColor(
                 ContextCompat.getColor(
@@ -361,9 +560,15 @@ class DashboardFragment : Fragment() {
                 )
             )
 
-            lightSwitch.isChecked = false
+            lightSwitch.isChecked =
+                false
         }
     }
+
+
+    // =========================================================
+    // LIGHT CONTROL INFORMATION
+    // =========================================================
 
     private fun updateLightControlInfo(
         light: Light,
@@ -371,37 +576,86 @@ class DashboardFragment : Fragment() {
         lightSwitch: SwitchMaterial
     ) {
 
+        val state =
+            SystemStateManager.state
+
+
         when (state.mode) {
+
+            // -------------------------------------------------
+            // MANUAL
+            // -------------------------------------------------
 
             SystemMode.MANUAL -> {
 
-                controlInfo.text = "Manual control"
+                controlInfo.text =
+                    "Manual control"
 
-                lightSwitch.isEnabled = state.connected
+                lightSwitch.isEnabled =
+                    state.connected
             }
+
+
+            // -------------------------------------------------
+            // AUTO
+            // -------------------------------------------------
 
             SystemMode.AUTO -> {
 
-                if (state.ambient == AmbientState.DARK) {
+                when (state.ambient) {
 
-                    controlInfo.text =
-                        "${light.pirName} controls this light"
+                    // -----------------------------------------
+                    // AUTO + DARK
+                    // -----------------------------------------
 
-                } else {
+                    AmbientState.DARK -> {
 
-                    controlInfo.text =
-                        "Daylight • automation paused"
+                        /*
+                         * Find the PIR assigned to
+                         * this particular light.
+                         */
+
+                        val linkedPir =
+                            SystemStateManager.sensors.find {
+
+                                it.type == SensorType.PIR &&
+                                        it.linkedLightId == light.id
+                            }
+
+
+                        if (linkedPir != null) {
+
+                            controlInfo.text =
+                                "${linkedPir.name} controls this light"
+
+                        } else {
+
+                            controlInfo.text =
+                                "No PIR assigned"
+                        }
+                    }
+
+
+                    // -----------------------------------------
+                    // AUTO + DAY
+                    // -----------------------------------------
+
+                    AmbientState.DAY -> {
+
+                        controlInfo.text =
+                            "Daylight • automation paused"
+                    }
                 }
 
-                lightSwitch.isEnabled = false
+
+                /*
+                 * User cannot manually control
+                 * lights in AUTO mode.
+                 */
+
+                lightSwitch.isEnabled =
+                    false
             }
         }
-    }
-
-    override fun onDestroyView() {
-
-        super.onDestroyView()
-
-        _binding = null
     }
 }

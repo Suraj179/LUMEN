@@ -1,25 +1,16 @@
 package com.example.lumen
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.TextView
-
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-
 import com.example.lumen.databinding.FragmentSensorsBinding
 
 class SensorsFragment : Fragment() {
 
     private var _binding: FragmentSensorsBinding? = null
     private val binding get() = _binding!!
-
-    private val state
-        get() = SystemStateManager.state
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,269 +34,264 @@ class SensorsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupTestButtons()
+        updateSensorUI()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (_binding != null) {
+            updateSensorUI()
+        }
+    }
+
+    // ---------------------------------------------------------
+    // TEST BUTTONS
+    // ---------------------------------------------------------
+
+    private fun setupTestButtons() {
+
+        binding.btnTestPir1.setOnClickListener {
+            togglePir(1)
+        }
+
+        binding.btnTestPir2.setOnClickListener {
+            togglePir(2)
+        }
+
+        binding.btnTestPir3.setOnClickListener {
+            togglePir(3)
+        }
+    }
+
+    private fun togglePir(sensorId: Int) {
+
+        val sensor = SystemStateManager.sensors.find {
+            it.id == sensorId &&
+                    it.type == SensorType.PIR
+        } ?: return
+
+        val newState =
+            if (sensor.state == PirState.ACTIVE) {
+                PirState.IDLE
+            } else {
+                PirState.ACTIVE
+            }
+
+        SystemStateManager.setPirState(
+            pirNumber = sensorId,
+            pirState = newState
+        )
 
         updateSensorUI()
     }
 
-    private fun setupTestButtons() {
-        binding.btnTestPir1.setOnClickListener {
-
-            if (
-                state.mode != SystemMode.AUTO ||
-                state.ambient != AmbientState.DARK
-            ) {
-                return@setOnClickListener
-            }
-
-            val newState =
-                if (state.pir1 == PirState.IDLE)
-                    PirState.ACTIVE
-                else
-                    PirState.IDLE
-
-            SystemStateManager.setPirState(
-                pirNumber = 1,
-                pirState = newState
-            )
-
-            updateSensorUI()
-        }
-
-        binding.btnTestPir2.setOnClickListener {
-
-            if (
-                state.mode != SystemMode.AUTO ||
-                state.ambient != AmbientState.DARK
-            ) {
-                return@setOnClickListener
-            }
-
-            val newState =
-                if (state.pir2 == PirState.IDLE)
-                    PirState.ACTIVE
-                else
-                    PirState.IDLE
-
-            SystemStateManager.setPirState(
-                pirNumber = 2,
-                pirState = newState
-            )
-
-            updateSensorUI()
-        }
-
-        binding.btnTestPir3.setOnClickListener {
-
-            if (
-                state.mode != SystemMode.AUTO ||
-                state.ambient != AmbientState.DARK
-            ) {
-                return@setOnClickListener
-            }
-
-            val newState =
-                if (state.pir3 == PirState.IDLE)
-                    PirState.ACTIVE
-                else
-                    PirState.IDLE
-
-            SystemStateManager.setPirState(
-                pirNumber = 3,
-                pirState = newState
-            )
-
-            updateSensorUI()
-        }
-    }
+    // ---------------------------------------------------------
+    // MAIN UI UPDATE
+    // ---------------------------------------------------------
 
     private fun updateSensorUI() {
 
-        updateSystemStatus()
+        updateSystemSensorStatus()
 
-        updatePir(
-            state.pir1,
-            binding.pir1IconContainer,
-            binding.txtPir1Status,
-            binding.txtPir1Description,
-            "Living Room"
+        updatePirSensor(
+            sensorId = 1,
+            card = binding.pir1Card,
+            iconContainer = binding.pir1IconContainer,
+            description = binding.txtPir1Description,
+            status = binding.txtPir1Status
         )
 
-        updatePir(
-            state.pir2,
-            binding.pir2IconContainer,
-            binding.txtPir2Status,
-            binding.txtPir2Description,
-            "Bedroom"
+        updatePirSensor(
+            sensorId = 2,
+            card = binding.pir2Card,
+            iconContainer = binding.pir2IconContainer,
+            description = binding.txtPir2Description,
+            status = binding.txtPir2Status
         )
 
-        updatePir(
-            state.pir3,
-            binding.pir3IconContainer,
-            binding.txtPir3Status,
-            binding.txtPir3Description,
-            "Kitchen"
+        updatePirSensor(
+            sensorId = 3,
+            card = binding.pir3Card,
+            iconContainer = binding.pir3IconContainer,
+            description = binding.txtPir3Description,
+            status = binding.txtPir3Status
         )
 
-        updateLdr()
+        updateLdrSensor()
     }
 
-    private fun updateSystemStatus() {
+    // ---------------------------------------------------------
+    // SYSTEM MODE
+    // ---------------------------------------------------------
 
-        when (state.mode) {
+    private fun updateSystemSensorStatus() {
+
+        when (SystemStateManager.state.mode) {
 
             SystemMode.MANUAL -> {
 
-                binding.txtSensorMode.text = "MANUAL"
+                binding.txtSensorMode.setText(
+                    R.string.sensor_mode_manual
+                )
 
-                binding.txtSensorModeDescription.text =
-                    "PIR sensors are not controlling lights"
+                binding.txtSensorModeDescription.setText(
+                    R.string.sensor_mode_manual_description
+                )
             }
 
             SystemMode.AUTO -> {
 
-                if (state.ambient == AmbientState.DARK) {
+                binding.txtSensorMode.setText(
+                    R.string.sensor_mode_auto
+                )
 
-                    binding.txtSensorMode.text = "AUTO • DARK"
-
-                    binding.txtSensorModeDescription.text =
-                        "PIR sensors are controlling the lights"
-
-                } else {
-
-                    binding.txtSensorMode.text = "AUTO • DAY"
-
-                    binding.txtSensorModeDescription.text =
-                        "Daylight detected • PIR lighting control paused"
-                }
+                binding.txtSensorModeDescription.setText(
+                    R.string.sensor_mode_auto_description
+                )
             }
         }
     }
 
-    private fun updatePir(
-        pirState: PirState,
-        iconContainer: FrameLayout,
-        status: TextView,
-        description: TextView,
-        room: String
+    // ---------------------------------------------------------
+    // PIR SENSOR
+    // ---------------------------------------------------------
+
+    private fun updatePirSensor(
+        sensorId: Int,
+        card: View,
+        iconContainer: View,
+        description: android.widget.TextView,
+        status: android.widget.TextView
     ) {
 
-        /*
-         * PIR is only meaningful when:
-         *
-         * AUTO + DARK
-         */
+        val sensor = SystemStateManager.sensors.find {
+            it.id == sensorId &&
+                    it.type == SensorType.PIR
+        }
 
-        val pirIsActive =
-            state.mode == SystemMode.AUTO &&
-                    state.ambient == AmbientState.DARK &&
-                    pirState == PirState.ACTIVE
+        // Sensor does not exist
+        if (sensor == null) {
+            card.visibility = View.GONE
+            return
+        }
 
-        if (pirIsActive) {
+        // Sensor exists
+        card.visibility = View.VISIBLE
+
+        val isActive =
+            SystemStateManager.state.mode == SystemMode.AUTO &&
+                    SystemStateManager.state.ambient == AmbientState.DARK &&
+                    sensor.state == PirState.ACTIVE
+
+        if (isActive) {
+
+            status.setText(R.string.sensor_active)
+
+            val linkedLight =
+                sensor.linkedLightId?.let { lightId ->
+                    SystemStateManager.lights.find {
+                        it.id == lightId
+                    }
+                }
+
+            if (linkedLight != null) {
+
+                description.text = getString(
+                    R.string.sensor_motion_controlling,
+                    linkedLight.room
+                )
+
+            } else {
+
+                description.setText(
+                    R.string.sensor_not_controlling
+                )
+            }
 
             iconContainer.isSelected = true
 
-            status.text = "ACTIVE"
-
-            status.setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.amber
-                )
-            )
-
-            description.text =
-                "Motion detected • controlling $room"
-
         } else {
+
+            status.setText(R.string.sensor_idle)
 
             iconContainer.isSelected = false
 
-            status.text = "IDLE"
-
-            status.setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.gray_text
-                )
-            )
-
-            when (state.mode) {
+            when (SystemStateManager.state.mode) {
 
                 SystemMode.MANUAL -> {
-
-                    description.text =
-                        "Not controlling lights"
+                    description.setText(
+                        R.string.sensor_not_controlling
+                    )
                 }
 
                 SystemMode.AUTO -> {
 
-                    if (state.ambient == AmbientState.DAY) {
+                    when (SystemStateManager.state.ambient) {
 
-                        description.text =
-                            "Lighting control paused"
+                        AmbientState.DAY -> {
+                            description.setText(
+                                R.string.sensor_lighting_paused
+                            )
+                        }
 
-                    } else {
-
-                        description.text =
-                            "No motion detected"
+                        AmbientState.DARK -> {
+                            description.setText(
+                                R.string.sensor_no_motion
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun updateLdr() {
+    // ---------------------------------------------------------
+    // LDR SENSOR
+    // ---------------------------------------------------------
 
-        when (state.ambient) {
+    private fun updateLdrSensor() {
+
+        val ldrSensor = SystemStateManager.sensors.find {
+            it.type == SensorType.LDR
+        }
+
+        if (ldrSensor == null) {
+
+            binding.ldrCard.visibility = View.GONE
+            return
+        }
+
+        binding.ldrCard.visibility = View.VISIBLE
+
+        when (SystemStateManager.state.ambient) {
 
             AmbientState.DAY -> {
 
-                binding.txtLdrStatus.text = "DAY"
-
-                binding.txtLdrStatus.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
+                binding.txtLdrStatus.setText(
+                    R.string.ambient_day
                 )
 
-                binding.txtLdrDescription.text =
-                    "Daylight detected"
+                binding.txtLdrDescription.setText(
+                    R.string.ldr_daylight
+                )
             }
 
             AmbientState.DARK -> {
 
-                binding.txtLdrStatus.text = "DARK"
-
-                binding.txtLdrStatus.setTextColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.amber
-                    )
+                binding.txtLdrStatus.setText(
+                    R.string.ambient_dark
                 )
 
-                binding.txtLdrDescription.text =
-                    "Dark environment detected"
+                binding.txtLdrDescription.setText(
+                    R.string.ldr_dark
+                )
             }
         }
     }
 
-    override fun onResume() {
-
-        super.onResume()
-
-        /*
-         * Refresh the screen whenever the user
-         * returns to the Sensors fragment.
-         */
-
-        updateSensorUI()
-    }
-
     override fun onDestroyView() {
-
         super.onDestroyView()
-
         _binding = null
     }
 }
