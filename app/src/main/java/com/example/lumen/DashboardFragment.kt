@@ -94,6 +94,8 @@ class DashboardFragment : Fragment() {
                     SystemStateManager.setMode(
                         SystemMode.MANUAL
                     )
+                    (requireActivity() as MainActivity)
+                        .refreshGlobalStatus()
                 }
 
                 binding.btnAuto.id -> {
@@ -101,6 +103,9 @@ class DashboardFragment : Fragment() {
                     SystemStateManager.setMode(
                         SystemMode.AUTO
                     )
+
+                    (requireActivity() as MainActivity)
+                        .refreshGlobalStatus()
                 }
             }
 
@@ -165,49 +170,13 @@ class DashboardFragment : Fragment() {
 
     private fun updateDashboard() {
 
-        updateConnectionUI()
+
 
         updateModeUI()
 
         updateAmbientUI()
 
         setupLights()
-    }
-
-
-    // =========================================================
-    // CONNECTION UI
-    // =========================================================
-
-    private fun updateConnectionUI() {
-
-        val connected =
-            SystemStateManager.state.connected
-
-        if (connected) {
-
-            binding.txtSystemConnection.text =
-                "● CONNECTED"
-
-            binding.txtSystemConnection.setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.amber
-                )
-            )
-
-        } else {
-
-            binding.txtSystemConnection.text =
-                "● DISCONNECTED"
-
-            binding.txtSystemConnection.setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.gray_text
-                )
-            )
-        }
     }
 
 

@@ -42,8 +42,56 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+        updateGlobalSystemStatus()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        updateGlobalSystemStatus()
+    }
+
+
+    private fun updateGlobalSystemStatus() {
+
+        if (SystemStateManager.state.connected) {
+
+            binding.txtGlobalConnection.text =
+                "● Connected"
+
+            binding.txtGlobalConnectionDescription.text =
+                "System is online"
+
+        } else {
+
+            binding.txtGlobalConnection.text =
+                "● Disconnected"
+
+            binding.txtGlobalConnectionDescription.text =
+                "System is offline"
+        }
+
+        when (SystemStateManager.state.mode) {
+
+            SystemMode.MANUAL -> {
+
+                binding.txtGlobalMode.text =
+                    "MANUAL"
+
+                binding.txtGlobalModeDescription.text =
+                    "Manual control"
+            }
+
+            SystemMode.AUTO -> {
+
+                binding.txtGlobalMode.text =
+                    "AUTO"
+
+                binding.txtGlobalModeDescription.text =
+                    "Automatic control"
+            }
+        }
+    }
     private fun loadFragment(fragment: Fragment) {
 
         supportFragmentManager
@@ -53,5 +101,9 @@ class MainActivity : AppCompatActivity() {
                 fragment
             )
             .commit()
+    }
+
+    fun refreshGlobalStatus() {
+        updateGlobalSystemStatus()
     }
 }
