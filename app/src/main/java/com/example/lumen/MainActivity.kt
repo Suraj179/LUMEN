@@ -7,7 +7,8 @@ import com.example.lumen.database.DatabaseProvider
 import com.example.lumen.databinding.ActivityMainBinding
 import com.example.lumen.repository.LightRepository
 import com.example.lumen.repository.SensorRepository
-
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -31,11 +32,22 @@ class MainActivity : AppCompatActivity() {
         sensorRepository = SensorRepository(
             database.sensorDao()
         )
+        // Initialize/load persistent device data
+        val databaseInitializer = DatabaseInitializer(
+            context = applicationContext,
+            database = database
+        )
 
-        // Open Dashboard first
-        if (savedInstanceState == null) {
-            loadFragment(DashboardFragment())
+        lifecycleScope.launch {
+            databaseInitializer.initialize()
+            updateGlobalSystemStatus()
+            // Open Dashboard first
+            if (savedInstanceState == null) {
+                loadFragment(DashboardFragment())
+            }
         }
+
+
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
 

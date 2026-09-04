@@ -8,6 +8,19 @@ object SystemStateManager {
         ambient = AmbientState.DAY
     )
 
+    fun loadDevices(
+        lights: List<Light>,
+        sensors: List<Sensor>
+    ) {
+        this.lights.clear()
+        this.lights.addAll(lights)
+
+        this.sensors.clear()
+        this.sensors.addAll(sensors)
+
+        updateAutomaticLights()
+    }
+
     val lights: MutableList<Light> = mutableListOf(
         Light(
             id = 1,
