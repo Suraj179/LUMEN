@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.lumen.databinding.FragmentSensorsBinding
 import com.example.lumen.databinding.ItemSensorLdrBinding
@@ -165,6 +166,10 @@ class SensorsFragment : Fragment() {
             itemBinding.txtSensorStatus.setText(
                 R.string.sensor_active
             )
+            itemBinding.txtSensorStatus.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.amber)
+            )
+            itemBinding.txtSensorStatus.setBackgroundResource(R.drawable.bg_status_on)
 
             itemBinding.sensorIconContainer.isSelected =
                 true
@@ -197,6 +202,10 @@ class SensorsFragment : Fragment() {
             itemBinding.txtSensorStatus.setText(
                 R.string.sensor_idle
             )
+            itemBinding.txtSensorStatus.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.gray_text) // Replace with your OFF text color
+            )
+            itemBinding.txtSensorStatus.setBackgroundResource(R.drawable.bg_status_off)
 
             itemBinding.sensorIconContainer.isSelected =
                 false

@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment
 import com.example.lumen.databinding.FragmentDevicesBinding
 import com.example.lumen.databinding.ItemDeviceLightBinding
 import com.example.lumen.databinding.ItemDeviceSensorBinding
-
+import androidx.core.content.ContextCompat
 class DevicesFragment : Fragment() {
 
     private var _binding: FragmentDevicesBinding? = null
@@ -97,38 +97,39 @@ class DevicesFragment : Fragment() {
     // LIGHT CARD
     // =========================================================
 
-    private fun createLightCard(
-        light: Light
-    ) {
+    private fun createLightCard(light: Light) {
+        val itemBinding = ItemDeviceLightBinding.inflate(
+            layoutInflater,
+            binding.deviceList,
+            false
+        )
 
-        val itemBinding =
-            ItemDeviceLightBinding.inflate(
-                layoutInflater,
-                binding.deviceList,
-                false
+        itemBinding.txtDeviceLightName.text = getString(
+            R.string.light_name_format,
+            light.id
+        )
+
+        itemBinding.txtDeviceLightRoom.text = light.room
+
+        itemBinding.txtDeviceLightTopic.text = getString(
+            R.string.topic_format,
+            light.mqttTopic
+        )
+
+        // Update text, text color, and background based on light.isOn
+        if (light.isOn) {
+            itemBinding.txtDeviceLightStatus.text = getString(R.string.on)
+            itemBinding.txtDeviceLightStatus.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.amber)
             )
-
-        itemBinding.txtDeviceLightName.text =
-            getString(
-                R.string.light_name_format,
-                light.id
+            itemBinding.txtDeviceLightStatus.setBackgroundResource(R.drawable.bg_status_on)
+        } else {
+            itemBinding.txtDeviceLightStatus.text = getString(R.string.off)
+            itemBinding.txtDeviceLightStatus.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.gray_text) // Replace with your OFF text color
             )
-
-        itemBinding.txtDeviceLightRoom.text =
-            light.room
-
-        itemBinding.txtDeviceLightTopic.text =
-            getString(
-                R.string.topic_format,
-                light.mqttTopic
-            )
-
-        itemBinding.txtDeviceLightStatus.text =
-            if (light.isOn) {
-                getString(R.string.on)
-            } else {
-                getString(R.string.off)
-            }
+            itemBinding.txtDeviceLightStatus.setBackgroundResource(R.drawable.bg_status_off) // Replace with your OFF background drawable
+        }
 
         itemBinding.btnEditLight.setOnClickListener {
             showEditLightDialog(light)
@@ -138,9 +139,7 @@ class DevicesFragment : Fragment() {
             showDeleteLightDialog(light)
         }
 
-        binding.deviceList.addView(
-            itemBinding.root
-        )
+        binding.deviceList.addView(itemBinding.root)
     }
 
     // =========================================================
