@@ -16,10 +16,14 @@ import com.example.lumen.databinding.FragmentDevicesBinding
 import com.example.lumen.databinding.ItemDeviceLightBinding
 import com.example.lumen.databinding.ItemDeviceSensorBinding
 import androidx.core.content.ContextCompat
+import android.view.Window
 class DevicesFragment : Fragment() {
 
     private var _binding: FragmentDevicesBinding? = null
     private val binding get() = _binding!!
+
+    private val Int.dp: Int
+        get() = (this * resources.displayMetrics.density).toInt()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -244,7 +248,7 @@ class DevicesFragment : Fragment() {
                 "LDR"
             )
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(
                 getString(
                     R.string.add_device
@@ -264,7 +268,9 @@ class DevicesFragment : Fragment() {
                         showAddLdrDialog()
                 }
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
     }
 
     // =========================================================
@@ -281,18 +287,29 @@ class DevicesFragment : Fragment() {
                 inputType =
                     InputType.TYPE_CLASS_TEXT or
                             InputType.TYPE_TEXT_FLAG_CAP_WORDS
+
+                setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.mist
+                    )
+                )
+
+                setHintTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.gray_text
+                    )
+                )
             }
 
-        AlertDialog.Builder(requireContext())
+        applyDialogPadding(input)
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Add Light")
             .setView(input)
-            .setNegativeButton(
-                "Cancel",
-                null
-            )
-            .setPositiveButton(
-                "Add"
-            ) { _, _ ->
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Add") { _, _ ->
 
                 val room =
                     input.text
@@ -300,9 +317,11 @@ class DevicesFragment : Fragment() {
                         .trim()
 
                 if (room.isEmpty()) {
+
                     showValidationError(
                         "Room name cannot be empty."
                     )
+
                     return@setPositiveButton
                 }
 
@@ -312,9 +331,12 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
-    }
+            .create()
 
+        dialog.show()
+
+        styleDialog(dialog)
+    }
     // =========================================================
     // ADD PIR
     // =========================================================
@@ -326,7 +348,7 @@ class DevicesFragment : Fragment() {
 
         if (lights.isEmpty()) {
 
-            AlertDialog.Builder(requireContext())
+            val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(
                     "No Lights Available"
                 )
@@ -337,7 +359,9 @@ class DevicesFragment : Fragment() {
                     "OK",
                     null
                 )
-                .show()
+                .create()
+            dialog.show()
+            styleDialog(dialog)
 
             return
         }
@@ -359,10 +383,10 @@ class DevicesFragment : Fragment() {
                     LinearLayout.VERTICAL
 
                 setPadding(
-                    40,
-                    0,
-                    40,
-                    0
+                    24.dp,
+                    8.dp,
+                    24.dp,
+                    8.dp
                 )
             }
 
@@ -477,7 +501,7 @@ class DevicesFragment : Fragment() {
             spinnerParams
         )
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(
                 "Add PIR Sensor"
             )
@@ -575,7 +599,9 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
     }
 
     // =========================================================
@@ -588,7 +614,7 @@ class DevicesFragment : Fragment() {
             SystemStateManager.hasLdr()
         ) {
 
-            AlertDialog.Builder(requireContext())
+            val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(
                     "LDR already exists"
                 )
@@ -599,7 +625,9 @@ class DevicesFragment : Fragment() {
                     "OK",
                     null
                 )
-                .show()
+                .create()
+            dialog.show()
+            styleDialog(dialog)
 
             return
         }
@@ -611,9 +639,24 @@ class DevicesFragment : Fragment() {
 
                 inputType =
                     InputType.TYPE_CLASS_NUMBER
-            }
 
-        AlertDialog.Builder(requireContext())
+                setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.mist
+                    )
+                )
+                setHintTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.gray_text
+                    )
+                )
+
+            }
+        applyDialogPadding(input)
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Add LDR")
             .setView(input)
             .setNegativeButton(
@@ -666,7 +709,9 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
     }
 
     // =========================================================
@@ -685,9 +730,16 @@ class DevicesFragment : Fragment() {
                 inputType =
                     InputType.TYPE_CLASS_TEXT or
                             InputType.TYPE_TEXT_FLAG_CAP_WORDS
+                setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.mist
+                    )
+                )
             }
+        applyDialogPadding(input)
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Edit Light")
             .setView(input)
             .setNegativeButton(
@@ -717,7 +769,9 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
     }
 
     // =========================================================
@@ -742,10 +796,10 @@ class DevicesFragment : Fragment() {
                     LinearLayout.VERTICAL
 
                 setPadding(
-                    40,
-                    0,
-                    40,
-                    0
+                    24.dp,
+                    8.dp,
+                    24.dp,
+                    8.dp
                 )
             }
 
@@ -892,7 +946,7 @@ class DevicesFragment : Fragment() {
             lightSpinner
         )
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(
                 "Edit PIR Sensor"
             )
@@ -995,7 +1049,9 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
     }
 
     // =========================================================
@@ -1006,7 +1062,7 @@ class DevicesFragment : Fragment() {
         light: Light
     ) {
 
-        AlertDialog.Builder(requireContext())
+        val dialog= AlertDialog.Builder(requireContext())
             .setTitle("Delete Light")
             .setMessage(
                 "Delete ${light.room}?"
@@ -1025,7 +1081,17 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
+        dialog.getButton(
+            AlertDialog.BUTTON_POSITIVE
+        )?.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.danger
+            )
+        )
     }
 
     // =========================================================
@@ -1036,7 +1102,7 @@ class DevicesFragment : Fragment() {
         sensor: Sensor
     ) {
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Delete Sensor")
             .setMessage(
                 "Delete ${sensor.name}?"
@@ -1055,7 +1121,17 @@ class DevicesFragment : Fragment() {
 
                 refreshDeviceList()
             }
-            .show()
+            .create()
+        dialog.show()
+        styleDialog(dialog)
+        dialog.getButton(
+            AlertDialog.BUTTON_POSITIVE
+        )?.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.danger
+            )
+        )
     }
 
     // =========================================================
@@ -1081,14 +1157,91 @@ class DevicesFragment : Fragment() {
         message: String
     ) {
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Invalid Device")
             .setMessage(message)
             .setPositiveButton(
                 "OK",
                 null
             )
-            .show()
+            .create()
+
+        dialog.show()
+
+        styleDialog(dialog)
+    }
+
+    private fun applyDialogPadding(view: View) {
+
+        view.setPadding(
+            24.dp,
+            8.dp,
+            24.dp,
+            8.dp
+        )
+    }
+
+    private fun styleDialog(dialog: AlertDialog) {
+
+        val window = dialog.window ?: return
+
+        // Rounded background
+        window.setBackgroundDrawableResource(
+            R.drawable.bg_dialog
+        )
+
+        // Dialog width = 90% of screen
+        val width =
+            (resources.displayMetrics.widthPixels * 0.90).toInt()
+
+        window.setLayout(
+            width,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        // Title
+        val titleId = resources.getIdentifier(
+            "alertTitle",
+            "id",
+            requireContext().packageName
+        )
+
+        dialog.findViewById<TextView>(titleId)?.apply {
+            setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.mist
+                )
+            )
+
+            textSize = 20f
+        }
+
+        // Positive button
+        dialog.getButton(
+            AlertDialog.BUTTON_POSITIVE
+        )?.apply {
+
+            setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.amber
+                )
+            )
+        }
+
+        // Negative button
+        dialog.getButton(
+            AlertDialog.BUTTON_NEGATIVE
+        )?.apply {
+
+            setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.mist
+                )
+            )
+        }
     }
 
     // =========================================================
