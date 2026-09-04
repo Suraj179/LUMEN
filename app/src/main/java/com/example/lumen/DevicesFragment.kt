@@ -17,11 +17,17 @@ import com.example.lumen.databinding.ItemDeviceLightBinding
 import com.example.lumen.databinding.ItemDeviceSensorBinding
 import androidx.core.content.ContextCompat
 import android.view.Window
+import androidx.lifecycle.lifecycleScope
+import com.example.lumen.database.DatabaseProvider
+import com.example.lumen.repository.LightRepository
+import com.example.lumen.repository.SensorRepository
+import kotlinx.coroutines.launch
 class DevicesFragment : Fragment() {
 
     private var _binding: FragmentDevicesBinding? = null
     private val binding get() = _binding!!
-
+    private lateinit var lightRepository: LightRepository
+    private lateinit var sensorRepository: SensorRepository
     private val Int.dp: Int
         get() = (this * resources.displayMetrics.density).toInt()
 
@@ -50,25 +56,54 @@ class DevicesFragment : Fragment() {
             savedInstanceState
         )
 
+        val database =
+            DatabaseProvider.getDatabase(
+                requireContext()
+            )
+
+        lightRepository =
+            LightRepository(
+                database.lightDao()
+            )
+
+        sensorRepository =
+            SensorRepository(
+                database.sensorDao()
+            )
+
         binding.btnAddDevice.setOnClickListener {
             showAddDeviceDialog()
         }
 
-        refreshDeviceList()
+        loadDevicesFromDatabase()
     }
 
     override fun onResume() {
         super.onResume()
 
         if (_binding != null) {
-            refreshDeviceList()
+            loadDevicesFromDatabase()
         }
     }
 
-    // =========================================================
-    // DEVICE LIST
-    // =========================================================
+    private fun loadDevicesFromDatabase() {
 
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            val lights =
+                lightRepository.getAllLights()
+
+            val sensors =
+                sensorRepository.getAllSensors()
+
+            SystemStateManager.loadDevices(
+                lights = lights,
+                sensors = sensors
+            )
+
+            refreshDeviceList()
+        }
+    }
     private fun refreshDeviceList() {
 
         binding.deviceList.removeAllViews()
@@ -325,11 +360,19 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                SystemStateManager.addLight(
-                    room = room
-                )
+                val newLight =
+                    SystemStateManager.addLight(
+                        room = room
+                    )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    lightRepository.insertLight(
+                        newLight
+                    )
+
+                    refreshDeviceList()
+                }
             }
             .create()
 
@@ -590,14 +633,22 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                SystemStateManager.addPir(
-                    name = name,
-                    gpio = gpio,
-                    linkedLightId =
-                        selectedLight.id
-                )
+                val newSensor =
+                    SystemStateManager.addPir(
+                        name = name,
+                        gpio = gpio,
+                        linkedLightId =
+                            selectedLight.id
+                    )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    sensorRepository.insertSensor(
+                        newSensor
+                    )
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
@@ -703,11 +754,19 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                SystemStateManager.addLdr(
-                    gpio = gpio
-                )
+                val newSensor =
+                    SystemStateManager.addLdr(
+                        gpio = gpio
+                    )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    sensorRepository.insertSensor(
+                        newSensor
+                    )
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
@@ -764,10 +823,16 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                light.room =
-                    newRoom
+                light.room = newRoom
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    lightRepository.updateLight(
+                        light
+                    )
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
@@ -1047,7 +1112,22 @@ class DevicesFragment : Fragment() {
                         selectedLight.id
                 )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    val updatedSensor =
+                        SystemStateManager.sensors.find {
+                            it.id == sensor.id
+                        }
+
+                    if (updatedSensor != null) {
+
+                        sensorRepository.updateSensor(
+                            updatedSensor
+                        )
+                    }
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
@@ -1079,7 +1159,24 @@ class DevicesFragment : Fragment() {
                     lightId = light.id
                 )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    lightRepository.deleteLight(
+                        light
+                    )
+
+                    val sensors =
+                        SystemStateManager.sensors
+
+                    sensors.forEach { sensor ->
+
+                        sensorRepository.updateSensor(
+                            sensor
+                        )
+                    }
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
@@ -1093,10 +1190,6 @@ class DevicesFragment : Fragment() {
             )
         )
     }
-
-    // =========================================================
-    // DELETE SENSOR
-    // =========================================================
 
     private fun showDeleteSensorDialog(
         sensor: Sensor
@@ -1119,7 +1212,14 @@ class DevicesFragment : Fragment() {
                     sensorId = sensor.id
                 )
 
-                refreshDeviceList()
+                viewLifecycleOwner.lifecycleScope.launch {
+
+                    sensorRepository.deleteSensor(
+                        sensor
+                    )
+
+                    refreshDeviceList()
+                }
             }
             .create()
         dialog.show()
