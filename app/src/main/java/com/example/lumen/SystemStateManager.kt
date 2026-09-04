@@ -110,6 +110,26 @@ object SystemStateManager {
         return newLight
     }
 
+    fun updateLight(
+        lightId: Int,
+        room: String
+    ): Boolean {
+
+        val light = lights.find {
+            it.id == lightId
+        } ?: return false
+
+        light.room = room
+
+        light.mqttTopic =
+            createMqttTopic(
+                room = room,
+                id = light.id
+            )
+
+        return true
+    }
+
     fun deleteLight(
         lightId: Int
     ) {

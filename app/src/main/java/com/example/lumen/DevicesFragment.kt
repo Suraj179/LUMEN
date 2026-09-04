@@ -132,10 +132,6 @@ class DevicesFragment : Fragment() {
         }
     }
 
-    // =========================================================
-    // LIGHT CARD
-    // =========================================================
-
     private fun createLightCard(light: Light) {
         val itemBinding = ItemDeviceLightBinding.inflate(
             layoutInflater,
@@ -789,6 +785,7 @@ class DevicesFragment : Fragment() {
                 inputType =
                     InputType.TYPE_CLASS_TEXT or
                             InputType.TYPE_TEXT_FLAG_CAP_WORDS
+
                 setTextColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -796,6 +793,7 @@ class DevicesFragment : Fragment() {
                     )
                 )
             }
+
         applyDialogPadding(input)
 
         val dialog = AlertDialog.Builder(requireContext())
@@ -823,7 +821,20 @@ class DevicesFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                light.room = newRoom
+                val updated =
+                    SystemStateManager.updateLight(
+                        lightId = light.id,
+                        room = newRoom
+                    )
+
+                if (!updated) {
+
+                    showValidationError(
+                        "Unable to update the light."
+                    )
+
+                    return@setPositiveButton
+                }
 
                 viewLifecycleOwner.lifecycleScope.launch {
 
@@ -835,10 +846,10 @@ class DevicesFragment : Fragment() {
                 }
             }
             .create()
+
         dialog.show()
         styleDialog(dialog)
     }
-
     // =========================================================
     // EDIT PIR
     // =========================================================
