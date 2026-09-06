@@ -1,6 +1,15 @@
 package com.example.lumen
 
+import android.util.Log
+import com.example.lumen.mqtt.MqttManager
+import com.example.lumen.mqtt.MqttConfig
 object SystemStateManager {
+
+    private var mqttManager: MqttManager? = null
+
+    fun setMqttManager(manager: MqttManager) {
+        mqttManager = manager
+    }
 
     val state = SystemState(
         connected = true,
@@ -381,9 +390,29 @@ object SystemStateManager {
 
         val light = lights.find {
             it.id == lightId
-        }
+        } ?: return
 
-        light?.isOn = isOn
+        // Update local state
+        light.isOn = isOn
+
+        // Convert Boolean to MQTT message
+        val message =
+            if (isOn) {
+                MqttConfig.MQTT_ON
+            } else {
+                MqttConfig.MQTT_OFF
+            }
+
+        // Send command to ESP32
+        mqttManager?.publish(
+            topic = light.mqttTopic,
+            message = message
+        )
+
+        Log.d(
+            "SystemStateManager",
+            "Light ${light.id}: $message"
+        )
     }
 
     // =========================================================

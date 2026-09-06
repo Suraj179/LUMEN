@@ -387,48 +387,11 @@ class DashboardFragment : Fragment() {
          * Manual switch control.
          */
 
-        lightSwitch.setOnCheckedChangeListener {
-
-                _: CompoundButton,
-                isChecked: Boolean ->
-
-            /*
-             * AUTO mode controls the light automatically.
-             *
-             * Therefore the user cannot manually
-             * change the light in AUTO mode.
-             */
-
-            if (
-                SystemStateManager.state.mode !=
-                SystemMode.MANUAL
-            ) {
-
-                return@setOnCheckedChangeListener
-            }
-
-
-            /*
-             * Update central state.
-             */
+        lightSwitch.setOnCheckedChangeListener { _, isChecked ->
 
             SystemStateManager.setLightState(
                 lightId = light.id,
                 isOn = isChecked
-            )
-
-
-            /*
-             * Update this card.
-             */
-
-            updateLightAppearance(
-                light = light,
-                card = card,
-                iconContainer = iconContainer,
-                icon = icon,
-                status = status,
-                lightSwitch = lightSwitch
             )
         }
 

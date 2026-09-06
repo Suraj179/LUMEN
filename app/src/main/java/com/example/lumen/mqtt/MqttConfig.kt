@@ -14,6 +14,10 @@ object MqttConfig {
     const val PIR_TOPIC_SUFFIX = "state"
     const val LDR_TOPIC = "home/ambient/ldr/state"
 
+    const val MQTT_ON = "ON"
+    const val MQTT_OFF = "OFF"
+
+
     fun createLightTopic(room: String, lightId: Int): String {
         val cleanRoom = room
             .lowercase()

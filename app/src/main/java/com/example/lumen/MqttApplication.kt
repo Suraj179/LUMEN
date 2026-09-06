@@ -22,5 +22,6 @@ class MqttApplication : Application() {
             brokerPort = MqttConfig.BROKER_PORT,
             clientId = clientId
         )
+        SystemStateManager.setMqttManager(mqttManager)
     }
 }

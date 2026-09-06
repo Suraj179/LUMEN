@@ -30,14 +30,23 @@ class MqttManager(
         private set
 
     var onConnectionChanged: ((Boolean) -> Unit)? = null
+
     var onMessageReceived: ((String, String) -> Unit)? = null
+
     var onError: ((String) -> Unit)? = null
+
+    // ---------------------------------------------------------
+    // CONNECT
+    // ---------------------------------------------------------
 
     fun connect() {
 
         if (mqttClient?.state?.isConnected == true) {
+
             Log.d(TAG, "Already connected")
+
             updateConnectionState(true)
+
             return
         }
 
@@ -52,7 +61,9 @@ class MqttManager(
 
                 val ipv4Address = InetAddress
                     .getAllByName(brokerHost)
-                    .firstOrNull { it is Inet4Address }
+                    .firstOrNull {
+                        it is Inet4Address
+                    }
 
                 if (ipv4Address == null) {
 
@@ -139,15 +150,21 @@ class MqttManager(
         }
     }
 
+    // ---------------------------------------------------------
+    // DISCONNECT
+    // ---------------------------------------------------------
+
     fun disconnect() {
 
         val client = mqttClient
 
-        if (client == null ||
+        if (
+            client == null ||
             !client.state.isConnected
         ) {
 
             updateConnectionState(false)
+
             return
         }
 
@@ -179,6 +196,10 @@ class MqttManager(
             }
     }
 
+    // ---------------------------------------------------------
+    // GENERIC PUBLISH
+    // ---------------------------------------------------------
+
     fun publish(
         topic: String,
         message: String,
@@ -188,7 +209,8 @@ class MqttManager(
 
         val client = mqttClient
 
-        if (client == null ||
+        if (
+            client == null ||
             !client.state.isConnected
         ) {
 
@@ -209,7 +231,9 @@ class MqttManager(
             .qos(convertQos(qos))
             .retain(retained)
             .payload(
-                message.toByteArray(Charsets.UTF_8)
+                message.toByteArray(
+                    Charsets.UTF_8
+                )
             )
             .send()
             .whenComplete { _, throwable ->
@@ -237,6 +261,37 @@ class MqttManager(
             }
     }
 
+    // ---------------------------------------------------------
+    // LIGHT CONTROL
+    // ---------------------------------------------------------
+
+    fun publishLightState(
+        topic: String,
+        isOn: Boolean
+    ) {
+
+        val message =
+            if (isOn) {
+                MqttConfig.MQTT_ON
+            } else {
+                MqttConfig.MQTT_OFF
+            }
+
+        Log.d(
+            TAG,
+            "Publishing light state: $topic -> $message"
+        )
+
+        publish(
+            topic = topic,
+            message = message
+        )
+    }
+
+    // ---------------------------------------------------------
+    // SUBSCRIBE
+    // ---------------------------------------------------------
+
     fun subscribe(
         topic: String,
         qos: Int = MqttConfig.DEFAULT_QOS
@@ -244,7 +299,8 @@ class MqttManager(
 
         val client = mqttClient
 
-        if (client == null ||
+        if (
+            client == null ||
             !client.state.isConnected
         ) {
 
@@ -320,11 +376,18 @@ class MqttManager(
             }
     }
 
-    fun unsubscribe(topic: String) {
+    // ---------------------------------------------------------
+    // UNSUBSCRIBE
+    // ---------------------------------------------------------
+
+    fun unsubscribe(
+        topic: String
+    ) {
 
         val client = mqttClient
 
-        if (client == null ||
+        if (
+            client == null ||
             !client.state.isConnected
         ) {
             return
@@ -353,7 +416,13 @@ class MqttManager(
             }
     }
 
-    private fun convertQos(qos: Int): MqttQos {
+    // ---------------------------------------------------------
+    // QOS
+    // ---------------------------------------------------------
+
+    private fun convertQos(
+        qos: Int
+    ): MqttQos {
 
         return when (qos) {
 
@@ -366,6 +435,10 @@ class MqttManager(
             else -> MqttQos.AT_LEAST_ONCE
         }
     }
+
+    // ---------------------------------------------------------
+    // CONNECTION STATE
+    // ---------------------------------------------------------
 
     private fun updateConnectionState(
         connected: Boolean
