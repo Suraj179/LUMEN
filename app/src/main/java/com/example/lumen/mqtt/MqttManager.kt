@@ -1,19 +1,19 @@
 package com.example.lumen.mqtt
 
-import android.content.Context
 import android.util.Log
-import org.eclipse.paho.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttMessage
+import com.hivemq.client.mqtt.MqttClient
+import com.hivemq.client.mqtt.datatypes.MqttQos
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import java.net.Inet4Address
+import java.net.InetAddress
 
 class MqttManager(
-    context: Context,
-    private val brokerUrl: String,
+    private val brokerHost: String,
+    private val brokerPort: Int,
     private val clientId: String
 ) {
 
@@ -21,398 +21,360 @@ class MqttManager(
         private const val TAG = "MqttManager"
     }
 
-    private val mqttClient = MqttAndroidClient(
-        context.applicationContext,
-        brokerUrl,
-        clientId
-    )
+    private val managerScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private var mqttClient: Mqtt3AsyncClient? = null
 
     var isConnected: Boolean = false
         private set
 
     var onConnectionChanged: ((Boolean) -> Unit)? = null
-
     var onMessageReceived: ((String, String) -> Unit)? = null
-
     var onError: ((String) -> Unit)? = null
-
-    init {
-        mqttClient.setCallback(object : MqttCallbackExtended {
-
-            override fun connectComplete(
-                reconnect: Boolean,
-                serverURI: String?
-            ) {
-                isConnected = true
-
-                Log.d(
-                    TAG,
-                    "Connected to MQTT broker: $serverURI"
-                )
-
-                onConnectionChanged?.invoke(true)
-            }
-
-            override fun connectionLost(cause: Throwable?) {
-                isConnected = false
-
-                Log.d(
-                    TAG,
-                    "MQTT connection lost",
-                    cause
-                )
-
-                onConnectionChanged?.invoke(false)
-
-                cause?.message?.let {
-                    onError?.invoke(it)
-                }
-            }
-
-            override fun messageArrived(
-                topic: String?,
-                message: MqttMessage?
-            ) {
-                if (topic == null || message == null) {
-                    return
-                }
-
-                val payload = String(message.payload)
-
-                Log.d(
-                    TAG,
-                    "Message received: $topic -> $payload"
-                )
-
-                onMessageReceived?.invoke(
-                    topic,
-                    payload
-                )
-            }
-
-            override fun deliveryComplete(
-                token: IMqttDeliveryToken?
-            ) {
-                Log.d(
-                    TAG,
-                    "Message delivery complete"
-                )
-            }
-        })
-    }
 
     fun connect() {
 
-        if (mqttClient.isConnected) {
+        if (mqttClient?.state?.isConnected == true) {
             Log.d(TAG, "Already connected")
+            updateConnectionState(true)
             return
         }
 
-        val options = MqttConnectOptions().apply {
+        managerScope.launch {
 
-            isAutomaticReconnect = true
+            try {
 
-            isCleanSession = true
+                Log.d(
+                    TAG,
+                    "Resolving IPv4 address for $brokerHost"
+                )
 
-            connectionTimeout = 10
+                val ipv4Address = InetAddress
+                    .getAllByName(brokerHost)
+                    .firstOrNull { it is Inet4Address }
 
-            keepAliveInterval = 30
-        }
+                if (ipv4Address == null) {
 
-        try {
+                    Log.e(
+                        TAG,
+                        "No IPv4 address found for $brokerHost"
+                    )
 
-            mqttClient.connect(
-                options,
-                null,
-                object : IMqttActionListener {
+                    updateConnectionState(false)
 
-                    override fun onSuccess(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?
-                    ) {
-                        Log.d(
-                            TAG,
-                            "MQTT connection successful"
-                        )
+                    onError?.invoke(
+                        "Could not find an IPv4 address for $brokerHost"
+                    )
 
-                        isConnected = true
-                        onConnectionChanged?.invoke(true)
-                    }
-
-                    override fun onFailure(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?,
-                        exception: Throwable?
-                    ) {
-                        isConnected = false
-
-                        Log.e(
-                            TAG,
-                            "MQTT connection failed",
-                            exception
-                        )
-
-                        onConnectionChanged?.invoke(false)
-
-                        onError?.invoke(
-                            exception?.message
-                                ?: "MQTT connection failed"
-                        )
-                    }
+                    return@launch
                 }
-            )
 
-        } catch (exception: MqttException) {
+                val ipv4Host =
+                    ipv4Address.hostAddress
 
-            isConnected = false
+                Log.d(
+                    TAG,
+                    "Using IPv4 address: $ipv4Host:$brokerPort"
+                )
 
-            Log.e(
-                TAG,
-                "MQTT connection exception",
-                exception
-            )
+                val client = MqttClient.builder()
+                    .useMqttVersion3()
+                    .identifier(clientId)
+                    .serverHost(ipv4Host)
+                    .serverPort(brokerPort)
+                    .buildAsync()
 
-            onConnectionChanged?.invoke(false)
+                mqttClient = client
 
-            onError?.invoke(
-                exception.message
-                    ?: "MQTT connection exception"
-            )
+                Log.d(
+                    TAG,
+                    "Connecting to $ipv4Host:$brokerPort"
+                )
+
+                client.connect()
+                    .whenComplete { _, throwable ->
+
+                        if (throwable != null) {
+
+                            Log.e(
+                                TAG,
+                                "MQTT connection failed",
+                                throwable
+                            )
+
+                            updateConnectionState(false)
+
+                            onError?.invoke(
+                                throwable.message
+                                    ?: "MQTT connection failed"
+                            )
+
+                        } else {
+
+                            Log.d(
+                                TAG,
+                                "Connected to MQTT broker"
+                            )
+
+                            updateConnectionState(true)
+                        }
+                    }
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    TAG,
+                    "MQTT setup failed",
+                    exception
+                )
+
+                updateConnectionState(false)
+
+                onError?.invoke(
+                    exception.message
+                        ?: "MQTT setup failed"
+                )
+            }
         }
     }
 
     fun disconnect() {
 
-        if (!mqttClient.isConnected) {
+        val client = mqttClient
+
+        if (client == null ||
+            !client.state.isConnected
+        ) {
+
+            updateConnectionState(false)
             return
         }
 
-        try {
+        client.disconnect()
+            .whenComplete { _, throwable ->
 
-            mqttClient.disconnect(
-                null,
-                object : IMqttActionListener {
+                if (throwable != null) {
 
-                    override fun onSuccess(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?
-                    ) {
-                        isConnected = false
+                    Log.e(
+                        TAG,
+                        "MQTT disconnect failed",
+                        throwable
+                    )
 
-                        Log.d(
-                            TAG,
-                            "MQTT disconnected"
-                        )
+                    onError?.invoke(
+                        throwable.message
+                            ?: "MQTT disconnect failed"
+                    )
 
-                        onConnectionChanged?.invoke(false)
-                    }
+                } else {
 
-                    override fun onFailure(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?,
-                        exception: Throwable?
-                    ) {
-                        Log.e(
-                            TAG,
-                            "MQTT disconnect failed",
-                            exception
-                        )
-                    }
+                    Log.d(
+                        TAG,
+                        "MQTT disconnected"
+                    )
+
+                    updateConnectionState(false)
                 }
-            )
-
-        } catch (exception: MqttException) {
-
-            Log.e(
-                TAG,
-                "MQTT disconnect exception",
-                exception
-            )
-        }
+            }
     }
 
     fun publish(
         topic: String,
         message: String,
-        qos: Int = 1,
-        retained: Boolean = false
+        qos: Int = MqttConfig.DEFAULT_QOS,
+        retained: Boolean = MqttConfig.DEFAULT_RETAINED
     ) {
 
-        if (!mqttClient.isConnected) {
-            onError?.invoke(
-                "Cannot publish: MQTT is not connected"
+        val client = mqttClient
+
+        if (client == null ||
+            !client.state.isConnected
+        ) {
+
+            Log.w(
+                TAG,
+                "Cannot publish. MQTT is not connected."
             )
+
+            onError?.invoke(
+                "MQTT is not connected"
+            )
+
             return
         }
 
-        try {
-
-            val mqttMessage = MqttMessage(
-                message.toByteArray()
-            ).apply {
-                this.qos = qos
-                isRetained = retained
-            }
-
-            mqttClient.publish(
-                topic,
-                mqttMessage
+        client.publishWith()
+            .topic(topic)
+            .qos(convertQos(qos))
+            .retain(retained)
+            .payload(
+                message.toByteArray(Charsets.UTF_8)
             )
+            .send()
+            .whenComplete { _, throwable ->
 
-            Log.d(
-                TAG,
-                "Message published: $topic -> $message"
-            )
+                if (throwable != null) {
 
-        } catch (exception: MqttException) {
+                    Log.e(
+                        TAG,
+                        "Publish failed: $topic",
+                        throwable
+                    )
 
-            Log.e(
-                TAG,
-                "Publish failed",
-                exception
-            )
+                    onError?.invoke(
+                        throwable.message
+                            ?: "Publish failed"
+                    )
 
-            onError?.invoke(
-                exception.message
-                    ?: "MQTT publish failed"
-            )
-        }
-    }
+                } else {
 
-    fun subscribe(
-        topic: String,
-        qos: Int = 1
-    ) {
-
-        if (!mqttClient.isConnected) {
-            onError?.invoke(
-                "Cannot subscribe: MQTT is not connected"
-            )
-            return
-        }
-
-        try {
-
-            mqttClient.subscribe(
-                topic,
-                qos,
-                null,
-                object : IMqttActionListener {
-
-                    override fun onSuccess(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?
-                    ) {
-                        Log.d(
-                            TAG,
-                            "Subscribed to: $topic"
-                        )
-                    }
-
-                    override fun onFailure(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?,
-                        exception: Throwable?
-                    ) {
-                        Log.e(
-                            TAG,
-                            "Subscription failed: $topic",
-                            exception
-                        )
-
-                        onError?.invoke(
-                            exception?.message
-                                ?: "MQTT subscription failed"
-                        )
-                    }
+                    Log.d(
+                        TAG,
+                        "Published: $topic -> $message"
+                    )
                 }
-            )
-
-        } catch (exception: MqttException) {
-
-            Log.e(
-                TAG,
-                "Subscribe exception",
-                exception
-            )
-
-            onError?.invoke(
-                exception.message
-                    ?: "MQTT subscribe failed"
-            )
-        }
+            }
     }
 
     fun subscribe(
         topic: String,
-        qos: Int = 1,
-        listener: IMqttMessageListener
+        qos: Int = MqttConfig.DEFAULT_QOS
     ) {
 
-        if (!mqttClient.isConnected) {
-            onError?.invoke(
-                "Cannot subscribe: MQTT is not connected"
+        val client = mqttClient
+
+        if (client == null ||
+            !client.state.isConnected
+        ) {
+
+            Log.w(
+                TAG,
+                "Cannot subscribe. MQTT is not connected."
             )
+
+            onError?.invoke(
+                "MQTT is not connected"
+            )
+
             return
         }
 
-        try {
+        client.subscribeWith()
+            .topicFilter(topic)
+            .qos(convertQos(qos))
+            .callback { publish ->
 
-            mqttClient.subscribe(
-                topic,
-                qos,
-                null,
-                object : IMqttActionListener {
+                val receivedTopic =
+                    publish.topic.toString()
 
-                    override fun onSuccess(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?
-                    ) {
-                        Log.d(
-                            TAG,
-                            "Subscribed to: $topic"
-                        )
-                    }
+                val receivedMessage =
+                    publish.payload
+                        .map { buffer ->
 
-                    override fun onFailure(
-                        asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?,
-                        exception: Throwable?
-                    ) {
-                        Log.e(
-                            TAG,
-                            "Subscription failed: $topic",
-                            exception
-                        )
-                    }
-                },
-                listener
-            )
+                            val bytes =
+                                ByteArray(buffer.remaining())
 
-        } catch (exception: MqttException) {
+                            buffer.get(bytes)
 
-            Log.e(
-                TAG,
-                "Subscribe exception",
-                exception
-            )
-        }
+                            String(
+                                bytes,
+                                Charsets.UTF_8
+                            )
+                        }
+                        .orElse("")
+
+                Log.d(
+                    TAG,
+                    "Received: $receivedTopic -> $receivedMessage"
+                )
+
+                onMessageReceived?.invoke(
+                    receivedTopic,
+                    receivedMessage
+                )
+            }
+            .send()
+            .whenComplete { _, throwable ->
+
+                if (throwable != null) {
+
+                    Log.e(
+                        TAG,
+                        "Subscribe failed: $topic",
+                        throwable
+                    )
+
+                    onError?.invoke(
+                        throwable.message
+                            ?: "Subscribe failed"
+                    )
+
+                } else {
+
+                    Log.d(
+                        TAG,
+                        "Subscribed: $topic"
+                    )
+                }
+            }
     }
 
     fun unsubscribe(topic: String) {
 
-        if (!mqttClient.isConnected) {
+        val client = mqttClient
+
+        if (client == null ||
+            !client.state.isConnected
+        ) {
             return
         }
 
-        try {
+        client.unsubscribeWith()
+            .topicFilter(topic)
+            .send()
+            .whenComplete { _, throwable ->
 
-            mqttClient.unsubscribe(topic)
+                if (throwable != null) {
 
-            Log.d(
-                TAG,
-                "Unsubscribed from: $topic"
-            )
+                    Log.e(
+                        TAG,
+                        "Unsubscribe failed: $topic",
+                        throwable
+                    )
 
-        } catch (exception: MqttException) {
+                } else {
 
-            Log.e(
-                TAG,
-                "Unsubscribe failed",
-                exception
-            )
+                    Log.d(
+                        TAG,
+                        "Unsubscribed: $topic"
+                    )
+                }
+            }
+    }
+
+    private fun convertQos(qos: Int): MqttQos {
+
+        return when (qos) {
+
+            0 -> MqttQos.AT_MOST_ONCE
+
+            1 -> MqttQos.AT_LEAST_ONCE
+
+            2 -> MqttQos.EXACTLY_ONCE
+
+            else -> MqttQos.AT_LEAST_ONCE
         }
+    }
+
+    private fun updateConnectionState(
+        connected: Boolean
+    ) {
+
+        isConnected = connected
+
+        onConnectionChanged?.invoke(
+            connected
+        )
     }
 }
