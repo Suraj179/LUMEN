@@ -12,13 +12,39 @@ object SystemStateManager {
         lights: List<Light>,
         sensors: List<Sensor>
     ) {
+        val currentLightStates =
+            this.lights.associate { light ->
+                light.id to light.isOn
+            }
+
+        val currentPirStates =
+            this.sensors
+                .filter { it.type == SensorType.PIR }
+                .associate { sensor ->
+                    sensor.id to sensor.state
+                }
+
         this.lights.clear()
-        this.lights.addAll(lights)
+
+        this.lights.addAll(
+            lights.map { light ->
+                light.copy(
+                    isOn = currentLightStates[light.id]
+                        ?: light.isOn
+                )
+            }
+        )
 
         this.sensors.clear()
-        this.sensors.addAll(sensors)
 
-        updateAutomaticLights()
+        this.sensors.addAll(
+            sensors.map { sensor ->
+                sensor.copy(
+                    state = currentPirStates[sensor.id]
+                        ?: sensor.state
+                )
+            }
+        )
     }
 
     val lights: MutableList<Light> = mutableListOf(

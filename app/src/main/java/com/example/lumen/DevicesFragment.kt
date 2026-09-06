@@ -75,35 +75,11 @@ class DevicesFragment : Fragment() {
             showAddDeviceDialog()
         }
 
-        loadDevicesFromDatabase()
+        // Load current runtime devices into the UI
+        refreshDeviceList()
     }
 
-    override fun onResume() {
-        super.onResume()
 
-        if (_binding != null) {
-            loadDevicesFromDatabase()
-        }
-    }
-
-    private fun loadDevicesFromDatabase() {
-
-        viewLifecycleOwner.lifecycleScope.launch {
-
-            val lights =
-                lightRepository.getAllLights()
-
-            val sensors =
-                sensorRepository.getAllSensors()
-
-            SystemStateManager.loadDevices(
-                lights = lights,
-                sensors = sensors
-            )
-
-            refreshDeviceList()
-        }
-    }
     private fun refreshDeviceList() {
 
         binding.deviceList.removeAllViews()
